@@ -23,9 +23,7 @@ function test_amg(dim,n)
     u0=rand(size(A,1))
     f=A*u0
     amg=AMGSolver(A)
-    u=zeros(size(A,1))
-    info=AMGCLWrap.apply!(amg,u,f)
-    @show info
+    u=amg\f
     @show norm(u0-u)
     norm(u0-u)<sqrt(eps(Float64))
 end
@@ -35,28 +33,8 @@ function test_rlx(dim,n)
     u0=rand(size(A,1))
     f=A*u0
     rlx=RLXSolver(A, (solver=(tol=1.0e-12,type="bicgstab"), precond=(type="ilu0",)))
-    u=zeros(size(A,1))
-    info=AMGCLWrap.apply!(rlx,u,f)
-    @show info
-    @show norm(u0-u)
-    norm(u0-u)<sqrt(eps(Float64))
-end
-
-function test_amg2(dim,n)
-    A=dlattice(dim,n)
-    u0=rand(size(A,1))
-    f=A*u0
-    amg=AMGSolver(A)
-    u=amg\f
-    norm(u0-u)<sqrt(eps(Float64))
-end
-
-function test_rlx2(dim,n)
-    A=dlattice(dim,n)
-    u0=rand(size(A,1))
-    f=A*u0
-    rlx=RLXSolver(A, (solver=(tol=1.0e-12,type="bicgstab"), precond=(type="ilu0",)))
     u=rlx\f
+    @show norm(u0-u)
     norm(u0-u)<sqrt(eps(Float64))
 end
 
@@ -66,7 +44,6 @@ function test_amgprecon(dim,n)
     f=A*u0
     amg=AMGPrecon(A)
     u,stats=bicgstab(A,f;M=amg,ldiv=true, rtol=1.0e-12)
-    @show stats
     @show norm(u0-u)
     norm(u0-u)<sqrt(eps(Float64))
 end
@@ -77,7 +54,6 @@ function test_rlxprecon(dim,n)
     f=A*u0
     rlx=RLXPrecon(A)
     u,stats=bicgstab(A,f;M=rlx,ldiv=true, rtol=1.0e-14,atol=1.0e-20)
-    @show stats
     @show norm(u0-u)
     norm(u0-u)<sqrt(eps(Float64))
 end
@@ -89,9 +65,6 @@ end
   @test test_amg(2,10000)
   @test test_amg(3,10000)
     
-  @test test_amg2(1,10000)
-  @test test_amg2(2,10000)
-  @test test_amg2(3,10000)
     
 end
 
@@ -101,9 +74,6 @@ end
   @test test_rlx(2,10000)
   @test test_rlx(3,10000)
     
-  @test test_rlx2(1,10000)
-  @test test_rlx2(2,10000)
-  @test test_rlx2(3,10000)
 end
 
 @testset "AMGPrecon" begin
