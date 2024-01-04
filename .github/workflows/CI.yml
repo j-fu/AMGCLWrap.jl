@@ -20,6 +20,7 @@ jobs:
       matrix:
         version:
           - '1.6'
+          - '1.10'
           - 'nightly'
         os:
           - ubuntu-latest
@@ -57,10 +58,3 @@ jobs:
       - uses: julia-actions/julia-docdeploy@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Run doctests
-        shell: julia --project=docs --color=yes {0}
-        run: |
-          using Documenter: DocMeta, doctest
-          using AMGCLWrap
-          DocMeta.setdocmeta!(AMGCLWrap, :DocTestSetup, :(using AMGCLWrap); recursive=true)
-          doctest(AMGCLWrap)
