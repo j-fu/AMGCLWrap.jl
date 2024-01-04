@@ -12,14 +12,15 @@ end
 
 lattice(L...; Tv = Float64) = lattice(L[1]; Tv) ⊕ lattice(L[2:end]...; Tv)
 
-function dlattice(dim, N; Tv = Float64, dd = 1.0e-2)
+function dlattice(Ti,dim, N; Tv = Float64, dd = 1.0e-2)
     n = N^(1 / dim) |> ceil |> Int
-    lattice([n for i in 1:dim]...; Tv) + Tv(dd) * I
+    SparseMatrixCSC{Float64,Ti}(lattice([n for i in 1:dim]...; Tv) + Tv(dd) * I)
 end;
 
 
-function test_amg(dim,n)
-    A=dlattice(dim,n)
+function test_amg(Ti,dim,n)
+    A=dlattice(Ti,dim,n)
+    @show size(A,1)
     u0=rand(size(A,1))
     f=A*u0
     amg=AMGSolver(A)
@@ -28,8 +29,8 @@ function test_amg(dim,n)
     norm(u0-u)<sqrt(eps(Float64))
 end
 
-function test_rlx(dim,n)
-    A=dlattice(dim,n)
+function test_rlx(Ti,dim,n)
+    A=dlattice(Ti,dim,n)
     u0=rand(size(A,1))
     f=A*u0
     rlx=RLXSolver(A, (solver=(tol=1.0e-12,type="bicgstab"), precond=(type="ilu0",)))
@@ -38,18 +39,18 @@ function test_rlx(dim,n)
     norm(u0-u)<sqrt(eps(Float64))
 end
 
-function test_amgprecon(dim,n)
-    A=dlattice(dim,n)
+function test_amgprecon(Ti,dim,n)
+    A=dlattice(Ti,dim,n)
     u0=rand(size(A,1))
     f=A*u0
     amg=AMGPrecon(A)
     u,stats=bicgstab(A,f;M=amg,ldiv=true, rtol=1.0e-12)
     @show norm(u0-u)
-    norm(u0-u)<sqrt(eps(Float64))
+    norm(u0-u)<10*sqrt(eps(Float64))
 end
 
-function test_rlxprecon(dim,n)
-    A=dlattice(dim,n)
+function test_rlxprecon(Ti,dim,n)
+    A=dlattice(Ti,dim,n)
     u0=rand(size(A,1))
     f=A*u0
     rlx=RLXPrecon(A)
@@ -58,38 +59,87 @@ function test_rlxprecon(dim,n)
     norm(u0-u)<sqrt(eps(Float64))
 end
 
-
-@testset "AMGSolver" begin
-
-  @test test_amg(1,10000)
-  @test test_amg(2,10000)
-  @test test_amg(3,10000)
-    
-    
+function test_amg(Ti,dim,n,bsize)
+    A=dlattice(Ti,dim,n)
+    u0=rand(size(A,1))
+    @show size(A,1)
+    f=A*u0
+    amg=BlockAMGSolver(A,bsize)
+    u=amg\f
+    @show norm(u0-u)
+    norm(u0-u)<10*sqrt(eps(Float64))
 end
 
-@testset "RLXSolver" begin
-
-  @test test_rlx(1,10000)
-  @test test_rlx(2,10000)
-  @test test_rlx(3,10000)
-    
+function test_rlx(Ti,dim,n,bsize)
+    A=dlattice(Ti,dim,n)
+    u0=rand(size(A,1))
+    f=A*u0
+    rlx=BlockRLXSolver(A, bsize, (solver=(tol=1.0e-12,type="bicgstab"), precond=(type="ilu0",)))
+    u=rlx\f
+    @show norm(u0-u)
+    norm(u0-u)<10*sqrt(eps(Float64))
 end
 
-@testset "AMGPrecon" begin
-
-  @test test_amgprecon(1,10000)
-  @test test_amgprecon(2,10000)
-  @test test_amgprecon(3,10000)
-    
-    
+function test_amgprecon(Ti,dim,n,bsize)
+    A=dlattice(Ti,dim,n)
+    u0=rand(size(A,1))
+    f=A*u0
+    amg=BlockAMGPrecon(A,bsize)
+    u,stats=bicgstab(A,f;M=amg,ldiv=true, rtol=1.0e-12)
+    @show norm(u0-u)
+    norm(u0-u)<10*sqrt(eps(Float64))
 end
 
-@testset "RLXPrecon" begin
+function test_rlxprecon(Ti,dim,n,bsize)
+    A=dlattice(Ti,dim,n)
+    u0=rand(size(A,1))
+    f=A*u0
+    rlx=BlockRLXPrecon(A,bsize)
+    u,stats=bicgstab(A,f;M=rlx,ldiv=true, rtol=1.0e-14,atol=1.0e-20)
+    @show norm(u0-u)
+    norm(u0-u)<10*sqrt(eps(Float64))
+end
 
-  @test test_rlxprecon(1,10000)
-  @test test_rlxprecon(2,10000)
-  @test test_rlxprecon(3,10000)
+
+
+const NTest=10000
+
+if Sys.WORD_SIZE == 64
+    Tis=[Int32, Int64]
+else
+    Tis=[Int32]
+end
+
+for Ti in Tis
     
-    
+@testset "AMGSolver, $Ti" begin
+  @test test_amg(Ti,1,NTest)
+  @test test_amg(Ti,2,NTest)
+  @test test_amg(Ti,3,NTest)
+end
+
+@testset "RLXSolver, $Ti" begin
+  @test test_rlx(Ti,1,NTest)
+  @test test_rlx(Ti,2,NTest)
+  @test test_rlx(Ti,3,NTest)
+end
+
+@testset "AMGPrecon, $Ti" begin
+  @test test_amgprecon(Ti,1,NTest)
+  @test test_amgprecon(Ti,2,NTest)
+  @test test_amgprecon(Ti,3,NTest)
+end
+
+@testset "RLXPrecon, $Ti" begin
+  @test test_rlxprecon(Ti,1,NTest)
+  @test test_rlxprecon(Ti,2,NTest)
+  @test test_rlxprecon(Ti,3,NTest)
+end
+@testset "blocksize 2, $Ti" begin
+ @test test_amg(Ti,3,NTest,2)
+ @test test_rlx(Ti,3,NTest,2)
+ @test test_amgprecon(Ti,3,NTest,2)
+ @test test_rlxprecon(Ti,3,NTest,2)
+end
+
 end

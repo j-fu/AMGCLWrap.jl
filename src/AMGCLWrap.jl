@@ -78,8 +78,91 @@ const DLBlockRLXPrecon=Dict(
     "CTv" => "Cdouble",
     "CTi" => "Clong")
 
-const scalar_instances=[DLAMGSolver, DLRLXSolver, DLAMGPrecon,DLRLXPrecon]
-const block_instances=[DLBlockAMGSolver, DLBlockRLXSolver, DLBlockAMGPrecon,DLBlockRLXPrecon]
+const scalar_dl_instances=[DLAMGSolver, DLRLXSolver, DLAMGPrecon,DLRLXPrecon]
+const block_dl_instances=[DLBlockAMGSolver, DLBlockRLXSolver, DLBlockAMGPrecon,DLBlockRLXPrecon]
+
+const DIAMGSolver=Dict(
+    "XXXMethod" => "AMGSolver",
+    "TvTi" => "DI",
+    "JTv"=> "Float64",
+    "JTi"=> "Int32",
+    "CTv" => "Cdouble",
+    "CTi" => "Cint")
+
+const DIRLXSolver=Dict(
+    "XXXMethod" => "RLXSolver",
+    "TvTi" => "DI",
+    "JTv"=> "Float64",
+    "JTi"=> "Int32",
+    "CTv" => "Cdouble",
+    "CTi" => "Cint")
+
+const DIAMGPrecon=Dict(
+    "XXXMethod" => "AMGPrecon",
+    "TvTi" => "DI",
+    "JTv"=> "Float64",
+    "JTi"=> "Int32",
+    "CTv" => "Cdouble",
+    "CTi" => "Cint")
+
+const DIRLXPrecon=Dict(
+    "XXXMethod" => "RLXPrecon",
+    "TvTi" => "DI",
+    "JTv"=> "Float64",
+    "JTi"=> "Int32",
+    "CTv" => "Cdouble",
+    "CTi" => "Cint")
+
+const DIBlockAMGSolver=Dict(
+    "XXXMethod" => "BlockAMGSolver",
+    "TvTi" => "DI",
+    "JTv"=> "Float64",
+    "JTi"=> "Int32",
+    "CTv" => "Cdouble",
+    "CTi" => "Cint")
+
+const DIBlockRLXSolver=Dict(
+    "XXXMethod" => "BlockRLXSolver",
+    "TvTi" => "DI",
+    "JTv"=> "Float64",
+    "JTi"=> "Int32",
+    "CTv" => "Cdouble",
+    "CTi" => "Cint")
+
+const DIBlockAMGPrecon=Dict(
+    "XXXMethod" => "BlockAMGPrecon",
+    "TvTi" => "DI",
+    "JTv"=> "Float64",
+    "JTi"=> "Int32",
+    "CTv" => "Cdouble",
+    "CTi" => "Cint")
+
+const DIBlockRLXPrecon=Dict(
+    "XXXMethod" => "BlockRLXPrecon",
+    "TvTi" => "DI",
+    "JTv"=> "Float64",
+    "JTi"=> "Int32",
+    "CTv" => "Cdouble",
+    "CTi" => "Cint")
+
+const scalar_di_instances=[DIAMGSolver, DIRLXSolver, DIAMGPrecon,DIRLXPrecon]
+const block_di_instances=[DIBlockAMGSolver, DIBlockRLXSolver, DIBlockAMGPrecon,DIBlockRLXPrecon]
+
+if Sys.WORD_SIZE == 64
+    const scalar_instances= vcat(scalar_di_instances, scalar_dl_instances)
+    const block_instances= vcat(block_di_instances, block_dl_instances)
+else
+    const scalar_instances= scalar_di_instances
+    const block_instances= block_di_instances
+end    
+
+for XXXMethod in unique([Symbol(instance["XXXMethod"]) for instance in scalar_instances])
+    @eval begin
+        mutable struct $XXXMethod{Tv,Ti}
+            handle::Ptr{Cvoid}
+        end
+    end
+end
 
 for instance in scalar_instances
     XXXMethod=Symbol(instance["XXXMethod"])
@@ -93,9 +176,6 @@ for instance in scalar_instances
     CTi=Symbol(instance["CTi"])
 
     @eval begin
-        mutable struct $XXXMethod{Tv,Ti}
-            handle::Ptr{Cvoid}
-        end
         
         function $XXXMethod(n, ia::Vector{Ti}, ja::Vector{Ti}, a::Vector{Tv}, param::String) where {Tv<:$JTv,Ti<:$JTi}
             this=ccall(($amgclcTvTiXXXMethodCreate,libamgcl_c),
@@ -119,6 +199,15 @@ for instance in scalar_instances
     end
 end
 
+for XXXMethod in unique([Symbol(instance["XXXMethod"]) for instance in block_instances])
+    @eval begin
+        mutable struct $XXXMethod{Tv,Ti}
+            handle::Ptr{Cvoid}
+            blocksize::Cint
+        end
+    end
+end
+
 for instance in block_instances
     XXXMethod=Symbol(instance["XXXMethod"])
     TvTiXXXMethod=instance["TvTi"]*instance["XXXMethod"]
@@ -131,11 +220,6 @@ for instance in block_instances
     CTi=Symbol(instance["CTi"])
 
     @eval begin
-        mutable struct $XXXMethod{Tv,Ti}
-            handle::Ptr{Cvoid}
-            blocksize::Cint
-        end
-        
         function $XXXMethod(n, ia::Vector{Ti}, ja::Vector{Ti}, a::Vector{Tv}, blocksize,param::String) where {Tv<:$JTv,Ti<:$JTi}
             this=ccall(($amgclcTvTiXXXMethodCreate,libamgcl_c),
                        $XXXMethod{$JTv,$JTi},
