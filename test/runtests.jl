@@ -18,83 +18,42 @@ function dlattice(Ti,dim, N; Tv = Float64, dd = 1.0e-2)
 end;
 
 
-function test_amg(Ti,dim,n)
-    A=dlattice(Ti,dim,n)
-    @show size(A,1)
-    u0=rand(size(A,1))
-    f=A*u0
-    amg=AMGSolver(A)
-    u=amg\f
-    @show norm(u0-u)
-    norm(u0-u)<sqrt(eps(Float64))
-end
-
-function test_rlx(Ti,dim,n)
-    A=dlattice(Ti,dim,n)
-    u0=rand(size(A,1))
-    f=A*u0
-    rlx=RLXSolver(A, (solver=(tol=1.0e-12,type="bicgstab"), precond=(type="ilu0",)))
-    u=rlx\f
-    @show norm(u0-u)
-    norm(u0-u)<sqrt(eps(Float64))
-end
-
-function test_amgprecon(Ti,dim,n)
-    A=dlattice(Ti,dim,n)
-    u0=rand(size(A,1))
-    f=A*u0
-    amg=AMGPrecon(A)
-    u,stats=bicgstab(A,f;M=amg,ldiv=true, rtol=1.0e-12)
-    @show norm(u0-u)
-    norm(u0-u)<10*sqrt(eps(Float64))
-end
-
-function test_rlxprecon(Ti,dim,n)
-    A=dlattice(Ti,dim,n)
-    u0=rand(size(A,1))
-    f=A*u0
-    rlx=RLXPrecon(A)
-    u,stats=bicgstab(A,f;M=rlx,ldiv=true, rtol=1.0e-14,atol=1.0e-20)
-    @show norm(u0-u)
-    norm(u0-u)<sqrt(eps(Float64))
-end
-
-function test_amg(Ti,dim,n,bsize)
+function test_amg(Ti,dim,n,bsize=1)
     A=dlattice(Ti,dim,n)
     u0=rand(size(A,1))
     @show size(A,1)
     f=A*u0
-    amg=BlockAMGSolver(A,bsize)
+    amg=AMGSolver(A; blocksize=bsize)
     u=amg\f
     @show norm(u0-u)
     norm(u0-u)<10*sqrt(eps(Float64))
 end
 
-function test_rlx(Ti,dim,n,bsize)
+function test_rlx(Ti,dim,n,bsize=1)
     A=dlattice(Ti,dim,n)
     u0=rand(size(A,1))
     f=A*u0
-    rlx=BlockRLXSolver(A, bsize, (solver=(tol=1.0e-12,type="bicgstab"), precond=(type="ilu0",)))
+    rlx=RLXSolver(A;blocksize= bsize, param=(solver=(tol=1.0e-12,type="bicgstab"), precond=(type="ilu0",)))
     u=rlx\f
     @show norm(u0-u)
     norm(u0-u)<10*sqrt(eps(Float64))
 end
 
-function test_amgprecon(Ti,dim,n,bsize)
+function test_amgprecon(Ti,dim,n,bsize=1)
     A=dlattice(Ti,dim,n)
     u0=rand(size(A,1))
     f=A*u0
-    amg=BlockAMGPrecon(A,bsize)
+    amg=AMGPrecon(A; blocksize = bsize)
     u,stats=bicgstab(A,f;M=amg,ldiv=true, rtol=1.0e-12)
     @show norm(u0-u)
     norm(u0-u)<10*sqrt(eps(Float64))
 end
 
-function test_rlxprecon(Ti,dim,n,bsize)
+function test_rlxprecon(Ti,dim,n,bsize=1)
     A=dlattice(Ti,dim,n)
     u0=rand(size(A,1))
     f=A*u0
-    rlx=BlockRLXPrecon(A,bsize)
+    rlx=RLXPrecon(A; blocksize=bsize)
     u,stats=bicgstab(A,f;M=rlx,ldiv=true, rtol=1.0e-14,atol=1.0e-20)
     @show norm(u0-u)
     norm(u0-u)<10*sqrt(eps(Float64))
@@ -135,6 +94,7 @@ end
   @test test_rlxprecon(Ti,2,NTest)
   @test test_rlxprecon(Ti,3,NTest)
 end
+    
 @testset "blocksize 2, $Ti" begin
  @test test_amg(Ti,3,NTest,2)
  @test test_rlx(Ti,3,NTest,2)

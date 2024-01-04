@@ -1,14 +1,16 @@
-```@meta
-CurrentModule = AMGCLWrap
+````@eval
+using Markdown
+Markdown.parse("""
+$(read("../../README.md",String))
+""")
+````
+
+
+```@docs
+AMGSolver
+RLXSolver
+AMGPrecon
+RLXPrecon
 ```
 
-# AMGCLWrap
 
-Documentation for [AMGCLWrap](https://github.com/j-fu/AMGCLWrap.jl).
-
-```@index
-```
-
-```@autodocs
-Modules = [AMGCLWrap]
-```
