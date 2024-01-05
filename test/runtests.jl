@@ -1,6 +1,6 @@
 using AMGCLWrap
 using Test, LinearAlgebra, SparseArrays
-using Krylov
+using Krylov,IterativeSolvers
 
 A ⊕ B = kron(I(size(B, 1)), A) + kron(B, I(size(A, 1)))
 function lattice(n; Tv = Float64)
@@ -17,6 +17,11 @@ function dlattice(Ti,dim, N; Tv = Float64, dd = 1.0e-2)
     SparseMatrixCSC{Float64,Ti}(lattice([n for i in 1:dim]...; Tv) + Tv(dd) * I)
 end;
 
+function iterate(A,f,M)
+    #u,stats=Krylov.bicgstab(A,f;M,ldiv=true, rtol=1.0e-12,verbose=1)
+    u=IterativeSolvers.cg(A,f;Pl=M,reltol=1.0e-12)
+    u
+end
 
 function test_amg(Ti,dim,n,bsize=1)
     A=dlattice(Ti,dim,n)
@@ -44,7 +49,7 @@ function test_amgprecon(Ti,dim,n,bsize=1)
     u0=rand(size(A,1))
     f=A*u0
     amg=AMGPrecon(A; blocksize = bsize)
-    u,stats=bicgstab(A,f;M=amg,ldiv=true, rtol=1.0e-12)
+    u=iterate(A,f,amg);
     @show norm(u0-u)
     norm(u0-u)<10*sqrt(eps(Float64))
 end
@@ -54,7 +59,7 @@ function test_rlxprecon(Ti,dim,n,bsize=1)
     u0=rand(size(A,1))
     f=A*u0
     rlx=RLXPrecon(A; blocksize=bsize)
-    u,stats=bicgstab(A,f;M=rlx,ldiv=true, rtol=1.0e-14,atol=1.0e-20)
+    u=iterate(A,f,rlx);
     @show norm(u0-u)
     norm(u0-u)<10*sqrt(eps(Float64))
 end
