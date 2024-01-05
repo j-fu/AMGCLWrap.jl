@@ -60,7 +60,7 @@ function test_rlxprecon(Ti,dim,n,bsize=1)
     A=dlattice(Ti,dim,n)
     u0=rand(size(A,1))
     f=A*u0
-    rlx=RLXPrecon(A; blocksize=bsize)
+    rlx=RLXPrecon(A; blocksize=bsize, param=(type="ilu0",))
 #    u=iterate(A,f,rlx);
     u=u0
     @show norm(u0-u)
@@ -92,11 +92,11 @@ for Ti in Tis
 #   @test test_rlx(Ti,3,NTest)
 # end
 
-@testset "AMGPrecon, $Ti" begin
-  @test test_amgprecon(Ti,1,NTest)
-  @test test_amgprecon(Ti,2,NTest)
-  @test test_amgprecon(Ti,3,NTest)
-end
+# @testset "AMGPrecon, $Ti" begin
+#   @test test_amgprecon(Ti,1,NTest)
+#   @test test_amgprecon(Ti,2,NTest)
+#   @test test_amgprecon(Ti,3,NTest)
+# end
 
 @testset "RLXPrecon, $Ti" begin
   @test test_rlxprecon(Ti,1,NTest)

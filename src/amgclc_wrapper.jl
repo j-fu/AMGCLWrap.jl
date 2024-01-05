@@ -115,7 +115,6 @@ for operatordict in operatordicts
         # Constructor from bunch of arrays
         #
         function $Operator(n, ia::Vector{Ti}, ja::Vector{Ti}, a::Vector{Tv}, blocksize,param::String) where {Tv<:$JTv,Ti<:$JTi}
-            this=$Operator{Tv,Ti}(0,0)
             this=ccall(($amgclcTvTiOperatorCreate,libamgcl_c),
                        $Operator{$JTv,$JTi},
                        (Cint, Ptr{$CTi}, Ptr{$CTi},Ptr{$CTv},Cint,Cstring),
@@ -183,8 +182,7 @@ for Operator in operators
             myoffset=1-getoffset(Bi)
             csr.rowptr.-=myoffset
             csr.colval.-=myoffset
-            operator=$Operator{Tv,Ti}(0,0)
-#            operator=$Operator(csr.m, csr.rowptr,csr.colval,csr.nzval,blocksize,tojson(param))
+            operator=$Operator(csr.m, csr.rowptr,csr.colval,csr.nzval,blocksize,tojson(param))
             csr.rowptr.+=myoffset
             csr.colval.+=myoffset
             return operator
