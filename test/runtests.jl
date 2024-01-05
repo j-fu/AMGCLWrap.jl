@@ -51,7 +51,7 @@ function test_amgprecon(Ti,dim,n,bsize=1)
     u0=rand(size(A,1))
     f=A*u0
     amg=AMGPrecon(A; blocksize = bsize)
-#    u=iterate(A,f,amg);
+    u=iterate(A,f,amg);
     u=u0
     @show norm(u0-u)
     norm(u0-u)<10*sqrt(eps(Float64))
@@ -64,7 +64,6 @@ function test_rlxprecon(Ti,dim,n,bsize=1)
     f=A*u0
     rlx=RLXPrecon(A; blocksize=bsize, param=(type="damped_jacobi",))
     u=iterate(A,f,rlx);
-#    u=u0
     @show norm(u0-u)
     norm(u0-u)<10*sqrt(eps(Float64))
     true
@@ -82,17 +81,17 @@ end
 
 for Ti in Tis
     
-# @testset "AMGSolver, $Ti" begin
-#   @test test_amg(Ti,1,NTest)
-#   @test test_amg(Ti,2,NTest)
-#   @test test_amg(Ti,3,NTest)
-# end
+@testset "AMGSolver, $Ti" begin
+  @test test_amg(Ti,1,NTest)
+  @test test_amg(Ti,2,NTest)
+  @test test_amg(Ti,3,NTest)
+end
 
-# @testset "RLXSolver, $Ti" begin
-#   @test test_rlx(Ti,1,NTest)
-#   @test test_rlx(Ti,2,NTest)
-#   @test test_rlx(Ti,3,NTest)
-# end
+@testset "RLXSolver, $Ti" begin
+  @test test_rlx(Ti,1,NTest)
+  @test test_rlx(Ti,2,NTest)
+  @test test_rlx(Ti,3,NTest)
+end
 
 # @testset "AMGPrecon, $Ti" begin
 #   @test test_amgprecon(Ti,1,NTest)
