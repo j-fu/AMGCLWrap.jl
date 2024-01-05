@@ -177,14 +177,14 @@ for Operator in operators
             - `params`: Any object (e.g. Tuple, Dict or JSON string) which can be turned into a JSON string by `JSON3.write`. If `params` is an emtpy string or `nothing` a default value is used.
          """
         function $Operator(csr::SparseMatrixCSR{Bi,Tv,Ti}; blocksize=1, param=nothing) where {Bi,Tv,Ti}
-            return $Operator{Tv,Ti}(0,0)
             if csr.m!=csr.n
                 error("Matrix must be square")
             end
             myoffset=1-getoffset(Bi)
             csr.rowptr.-=myoffset
             csr.colval.-=myoffset
-            operator=$Operator(csr.m, csr.rowptr,csr.colval,csr.nzval,blocksize,tojson(param))
+            operator=$Operator{Tv,Ti}(0,0)
+#            operator=$Operator(csr.m, csr.rowptr,csr.colval,csr.nzval,blocksize,tojson(param))
             csr.rowptr.+=myoffset
             csr.colval.+=myoffset
             return operator
