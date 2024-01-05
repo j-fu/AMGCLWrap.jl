@@ -60,7 +60,7 @@ function test_rlxprecon(Ti,dim,n,bsize=1)
     A=dlattice(Ti,dim,n)
     u0=rand(size(A,1))
     f=A*u0
-    rlx=RLXPrecon(A; blocksize=bsize, param=(type="ilu0",))
+    rlx=RLXPrecon(A; blocksize=bsize, param=(type="spai0",))
 #    u=iterate(A,f,rlx);
     u=u0
     @show norm(u0-u)
