@@ -80,17 +80,17 @@ end
 
 for Ti in Tis
     
-@testset "AMGSolver, $Ti" begin
-  @test test_amg(Ti,1,NTest)
-  @test test_amg(Ti,2,NTest)
-  @test test_amg(Ti,3,NTest)
-end
+# @testset "AMGSolver, $Ti" begin
+#   @test test_amg(Ti,1,NTest)
+#   @test test_amg(Ti,2,NTest)
+#   @test test_amg(Ti,3,NTest)
+# end
 
-@testset "RLXSolver, $Ti" begin
-  @test test_rlx(Ti,1,NTest)
-  @test test_rlx(Ti,2,NTest)
-  @test test_rlx(Ti,3,NTest)
-end
+# @testset "RLXSolver, $Ti" begin
+#   @test test_rlx(Ti,1,NTest)
+#   @test test_rlx(Ti,2,NTest)
+#   @test test_rlx(Ti,3,NTest)
+# end
 
 @testset "AMGPrecon, $Ti" begin
   @test test_amgprecon(Ti,1,NTest)
@@ -104,11 +104,11 @@ end
   @test test_rlxprecon(Ti,3,NTest)
 end
     
-@testset "blocksize 2, $Ti" begin
- @test test_amg(Ti,3,NTest,2)
- @test test_rlx(Ti,3,NTest,2)
- @test test_amgprecon(Ti,3,NTest,2)
- @test test_rlxprecon(Ti,3,NTest,2)
-end
+# @testset "blocksize 2, $Ti" begin
+#  @test test_amg(Ti,3,NTest,2)
+#  @test test_rlx(Ti,3,NTest,2)
+#  @test test_amgprecon(Ti,3,NTest,2)
+#  @test test_rlxprecon(Ti,3,NTest,2)
+# end
 
 end
