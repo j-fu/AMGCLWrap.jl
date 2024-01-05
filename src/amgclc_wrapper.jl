@@ -116,13 +116,11 @@ for operatordict in operatordicts
         #
         function $Operator(n, ia::Vector{Ti}, ja::Vector{Ti}, a::Vector{Tv}, blocksize,param::String) where {Tv<:$JTv,Ti<:$JTi}
             this=$Operator{Tv,Ti}(0,0)
-            if issolver(this)
-                this=ccall(($amgclcTvTiOperatorCreate,libamgcl_c),
-                           $Operator{$JTv,$JTi},
-                           (Cint, Ptr{$CTi}, Ptr{$CTi},Ptr{$CTv},Cint,Cstring),
-                           n, ia,ja, a, blocksize, param);
+            this=ccall(($amgclcTvTiOperatorCreate,libamgcl_c),
+                       $Operator{$JTv,$JTi},
+                       (Cint, Ptr{$CTi}, Ptr{$CTi},Ptr{$CTv},Cint,Cstring),
+                       n, ia,ja, a, blocksize, param);
                 finalizer(finalize!,this)
-            end
             this
         end
         
@@ -192,7 +190,8 @@ for Operator in operators
         end
 
         function $Operator(csc::SparseArrays.AbstractSparseMatrixCSC{Tv,Ti}; blocksize=1,param=nothing) where {Tv,Ti}
-            $Operator(SparseMatrixCSR{1}(transpose(SparseMatrixCSC(csc)));blocksize,param)
+            #$Operator(SparseMatrixCSR{1}(transpose(SparseMatrixCSC(csc)));blocksize,param)
+            $Operator{Tv,Ti}(0,0)
         end
     end
 end
