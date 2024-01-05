@@ -20,9 +20,9 @@ end;
 
 function iterate(A,f,M)
 #    u,stats=Krylov.cg(A,f;M,ldiv=true, rtol=1.0e-12,verbose=1)
-#    u=IterativeSolvers.cg(A,f;Pl=M,reltol=1.0e-12)
+    u=IterativeSolvers.cg(A,f;Pl=M,reltol=1.0e-12)
 #    M\f
-    f
+    u
 end
 
 function test_amg(Ti,dim,n,bsize=1)
@@ -93,11 +93,11 @@ end
   @test test_rlx(Ti,3,NTest)
 end
 
-# @testset "AMGPrecon, $Ti" begin
-#   @test test_amgprecon(Ti,1,NTest)
-#   @test test_amgprecon(Ti,2,NTest)
-#   @test test_amgprecon(Ti,3,NTest)
-# end
+@testset "AMGPrecon, $Ti" begin
+  @test test_amgprecon(Ti,1,NTest)
+  @test test_amgprecon(Ti,2,NTest)
+  @test test_amgprecon(Ti,3,NTest)
+end
 
 @testset "RLXPrecon, $Ti" begin
   @test test_rlxprecon(Ti,1,NTest)
@@ -105,11 +105,11 @@ end
   @test test_rlxprecon(Ti,3,NTest)
 end
     
-# @testset "blocksize 2, $Ti" begin
-#  @test test_amg(Ti,3,NTest,2)
-#  @test test_rlx(Ti,3,NTest,2)
-#  @test test_amgprecon(Ti,3,NTest,2)
-#  @test test_rlxprecon(Ti,3,NTest,2)
-# end
+@testset "blocksize 2, $Ti" begin
+ @test test_amg(Ti,3,NTest,2)
+ @test test_rlx(Ti,3,NTest,2)
+ @test test_amgprecon(Ti,3,NTest,2)
+ @test test_rlxprecon(Ti,3,NTest,2)
+end
 
 end
