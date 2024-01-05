@@ -115,11 +115,14 @@ for operatordict in operatordicts
         # Constructor from bunch of arrays
         #
         function $Operator(n, ia::Vector{Ti}, ja::Vector{Ti}, a::Vector{Tv}, blocksize,param::String) where {Tv<:$JTv,Ti<:$JTi}
-            this=ccall(($amgclcTvTiOperatorCreate,libamgcl_c),
-                       $Operator{$JTv,$JTi},
-                       (Cint, Ptr{$CTi}, Ptr{$CTi},Ptr{$CTv},Cint,Cstring),
-                       n, ia,ja, a, blocksize, param);
-            finalizer(finalize!,this)
+            this=$Operator{Tv,Ti}(0,0)
+            if issolver(this)
+                this=ccall(($amgclcTvTiOperatorCreate,libamgcl_c),
+                           $Operator{$JTv,$JTi},
+                           (Cint, Ptr{$CTi}, Ptr{$CTi},Ptr{$CTv},Cint,Cstring),
+                           n, ia,ja, a, blocksize, param);
+                finalizer(finalize!,this)
+            end
             this
         end
         
