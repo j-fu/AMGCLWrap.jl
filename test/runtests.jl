@@ -30,8 +30,11 @@ function test_amg(Ti,dim,n,bsize=1)
     u0=rand(size(A,1))
     @show size(A,1)
     f=A*u0
+    @show f[1]
     amg=AMGSolver(A; blocksize=bsize)
+    @show amg
     u=amg\f
+    @show u[1]
     @show norm(u0-u)
     norm(u0-u)<10*sqrt(eps(Float64))
 end
