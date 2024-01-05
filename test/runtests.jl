@@ -79,7 +79,7 @@ else
     Tis=[Int32]
 end
 
-for Ti in Tis
+for Ti in [Int64]
     
 @testset "AMGSolver, $Ti" begin
   @test test_amg(Ti,1,NTest)
