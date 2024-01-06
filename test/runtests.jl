@@ -19,8 +19,8 @@ function dlattice(Ti,dim, N; Tv = Float64, dd = 1.0e-2)
 end;
 
 function iterate(A,f,M)
-#    u,stats=Krylov.cg(A,f;M,ldiv=true, rtol=1.0e-12,verbose=1)
-    u=IterativeSolvers.cg(A,f;Pl=M,reltol=1.0e-12)
+    u,stats=Krylov.cg(A,f;M,ldiv=true, rtol=1.0e-12,verbose=1)
+#    u=IterativeSolvers.cg(A,f;Pl=M,reltol=1.0e-12)
 #    M\f
     u
 end
