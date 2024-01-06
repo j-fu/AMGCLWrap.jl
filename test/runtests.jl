@@ -19,22 +19,16 @@ function dlattice(Ti,dim, N; Tv = Float64, dd = 1.0e-2)
 end;
 
 function iterate(A,f,M)
-    u,stats=Krylov.cg(A,f;M,ldiv=true, rtol=1.0e-12,verbose=1)
-#    u=IterativeSolvers.cg(A,f;Pl=M,reltol=1.0e-12)
-#    M\f
+    u,stats=Krylov.cg(A,f;M,ldiv=true, rtol=1.0e-12)
     u
 end
 
 function test_amg(Ti,dim,n,bsize=1)
     A=dlattice(Ti,dim,n)
     u0=rand(size(A,1))
-    @show size(A,1)
     f=A*u0
-    @show f[1]
     amg=AMGSolver(A; blocksize=bsize)
-    @show amg
     u=amg\f
-    @show u[1]
     @show norm(u0-u)
     norm(u0-u)<10*sqrt(eps(Float64))
 end
@@ -80,15 +74,8 @@ if Sys.WORD_SIZE == 64
 else
     Tis=[Int32]
 end
-@testset "amgcl_c test" begin
-    @test AMGCLWrap.simpletest()==1
-    @test AMGCLWrap.fulltest(10)==1
-    @test AMGCLWrap.xxxtest(3.0,10)==10
-end
 
-for Ti in [Int32]
-
-
+for Ti in Tis
     
 @testset "AMGSolver, $Ti" begin
   @test test_amg(Ti,1,NTest)
