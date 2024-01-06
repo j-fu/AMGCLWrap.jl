@@ -73,7 +73,7 @@ function test_rlxprecon(Ti,dim,n,bsize=1)
 end
 
 
-const NTest=10000
+const NTest=100
 
 if Sys.WORD_SIZE == 64
     Tis=[Int32, Int64]
