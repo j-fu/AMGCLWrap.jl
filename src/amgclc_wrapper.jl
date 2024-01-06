@@ -47,7 +47,7 @@ const itypedict=Dict(
 if Sys.WORD_SIZE == 64
     const idxtypedicts=[ltypedict,itypedict]
 else
-    const idxtypedict=[itypedict]
+    const idxtypedicts=[itypedict]
 end    
 
 #
