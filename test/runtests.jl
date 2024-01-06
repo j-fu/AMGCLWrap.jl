@@ -1,9 +1,6 @@
-using Pkg
-Pkg.add(url="https://github.com/j-fu/AMGCL_C_jll.jl")
 using AMGCLWrap
 using Test, LinearAlgebra, SparseArrays
 using Krylov,IterativeSolvers
-using AMGCL_C_jll
 
 
 A ⊕ B = kron(I(size(B, 1)), A) + kron(B, I(size(A, 1)))
@@ -75,13 +72,6 @@ function test_rlxprecon(Ti,dim,n,bsize=1)
     true
 end
 
-function simpletest()
-    ccall( (:simpletest, libamgcl_c), Cint, ())
-end
-
-function fulltest(n)
-    ccall( (:fulltest, libamgcl_c), Cint, (Cint,), n)
-end
 
 const NTest=10000
 
@@ -91,8 +81,8 @@ else
     Tis=[Int32]
 end
 @testset "amgcl_c test" begin
-  @test simpletest()==1
-  @test fulltest(10)==1
+  @test AMGCLWrap.simpletest()==1
+  @test AMGCLWrap.fulltest(10)==1
 end
 
 for Ti in [Int64]
