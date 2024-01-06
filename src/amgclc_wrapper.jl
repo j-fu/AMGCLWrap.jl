@@ -50,17 +50,18 @@ else
     const idxtypedicts=[itypedict]
 end    
 
+const numtypedicts=[dtypedict]
 #
 # Dicts which describe how to wrap operator names in C
 #
 const operatordicts=[]
 
-for method in operators
+for operator in operators
     for idxtypedict in idxtypedicts
-        for numtypedict in [dtypedict]
+        for numtypedict in numtypedicts
             TvTi=numtypedict["RealChar"]*idxtypedict["IntChar"]
             dict=Dict(
-                "Operator" => String(method),
+                "Operator" => String(operator),
                 "TvTi" => TvTi,
                 "JTv"  => numtypedict["JTv"],
                 "JTi"  => idxtypedict["JTi"],
@@ -73,6 +74,7 @@ end
 
 
 abstract type AbstractAMGCLOperator end
+
 #
 # Define operator types
 #

@@ -86,7 +86,7 @@ end
     @test AMGCLWrap.xxxtest(3.0,10)==10
 end
 
-for Ti in [Int64]
+for Ti in [Int32]
 
 
     
