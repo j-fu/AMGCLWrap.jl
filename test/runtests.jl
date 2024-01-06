@@ -1,6 +1,6 @@
 using AMGCLWrap
 using Test, LinearAlgebra, SparseArrays
-using Krylov,IterativeSolvers
+using Krylov
 
 
 A ⊕ B = kron(I(size(B, 1)), A) + kron(B, I(size(A, 1)))
