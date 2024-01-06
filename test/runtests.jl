@@ -83,7 +83,7 @@ end
 @testset "amgcl_c test" begin
     @test AMGCLWrap.simpletest()==1
     @test AMGCLWrap.fulltest(10)==1
-    @test AMGCLWrap.xxxtest(10)==10
+    @test AMGCLWrap.xxxtest(3.0,10)==10
 end
 
 for Ti in [Int64]

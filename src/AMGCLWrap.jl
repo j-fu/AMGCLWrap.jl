@@ -15,14 +15,14 @@ function fulltest(n)
     ccall( (:fulltest, libamgcl_c), Cint, (Cint,), n)
 end
 
-struct xxxSolver
+struct xxxSolver{Tv, Ti}
     handle::Ptr{Cvoid}
     blocksize::Cint
 end
 
 
-function xxxtest(n)
-    s=ccall( (:xxxCreate, libamgcl_c), xxxSolver, (Cint,), n)
+function xxxtest(x::Tv, n::Ti) where{Tv,Ti}
+    s=ccall( (:xxxCreate, libamgcl_c), xxxSolver{Tv,Ti}, (Cint,), n)
     s.blocksize
 end
 
