@@ -104,7 +104,7 @@ for operatordict in operatordicts
     CTi=Symbol(operatordict["CTi"])
     
     @eval begin
-        function finalize!(operator::$Operator{Tv,Ti}) where {Tv<:$JTv,Ti<:$JTi}
+        function finalize!(operator::$Operator{$JTv,$JTi}) 
             ccall(($amgclcTvTiOperatorDestroy,libamgcl_c),
                   Cvoid,
                   ($Operator{$JTv, $JTi},),
@@ -114,7 +114,7 @@ for operatordict in operatordicts
         #
         # Constructor from bunch of arrays
         #
-        function $Operator(n, ia::Vector{Ti}, ja::Vector{Ti}, a::Vector{Tv}, blocksize,param::String) where {Tv<:$JTv,Ti<:$JTi}
+        function $Operator(n, ia::Vector{$JTi}, ja::Vector{$JTi}, a::Vector{$JTv}, blocksize,param::String)
             this=ccall(($amgclcTvTiOperatorCreate,libamgcl_c),
                        $Operator{$JTv,$JTi},
                        (Cint, Ptr{$CTi}, Ptr{$CTi},Ptr{$CTv},Cint,Cstring),
@@ -126,7 +126,7 @@ for operatordict in operatordicts
         #
         # Solve matrix/preconditioning system
         #
-        function apply!(operator::$Operator{Tv,Ti}, sol::Vector{Tv}, rhs::Vector{Tv})  where {Tv<:$JTv,Ti<:$JTi}
+        function apply!(operator::$Operator{$JTv,$JTi}, sol::Vector{$JTv}, rhs::Vector{$JTv})
             if issolver(operator)
                 i=ccall(($amgclcTvTiOperatorApply,libamgcl_c),
                         AMGCLInfo,
