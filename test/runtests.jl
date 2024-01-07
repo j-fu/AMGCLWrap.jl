@@ -68,16 +68,8 @@ end
 
 
 const NTest=10000
-A0=sprand(10,10,0.1)
-@show typeof(A0)
-@show Sys.WORD_SIZE
-@show sizeof(Cint)
-@show sizeof(Clong)
-@show sizeof(Clonglong)
 
-Tis=[Int32, Int64]
-
-for Ti in Tis
+for Ti in [Int32, Int64]
     
 @testset "AMGSolver, $Ti" begin
   @test test_amg(Ti,1,NTest)

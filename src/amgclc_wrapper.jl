@@ -34,22 +34,20 @@ const dtypedict=Dict(
     "CTv"=>"Cdouble")
 
 
+#
+# amgcl_c guarantees that "DI" maps to Int32 and "DL" to Int64
+#
 const ltypedict=Dict(
     "IntChar"=> "L",
     "JTi"=>"Int64",
-    "CTi"=>sizeof(Clong)==8 ? "Clong" : "Clonglong")
+    "CTi"=>"Int64") 
 
 const itypedict=Dict(
     "IntChar"=> "I",
     "JTi"=>"Int32",
-    "CTi"=>"Cint")
+    "CTi"=>"Int32")
 
-
-if Sys.WORD_SIZE == 64
-    const idxtypedicts=[ltypedict,itypedict]
-else
-    const idxtypedicts=[itypedict]
-end    
+const idxtypedicts=[ltypedict,itypedict]
 
 const numtypedicts=[dtypedict]
 #
