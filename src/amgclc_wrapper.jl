@@ -33,34 +33,34 @@ const dtypedict=Dict(
     "JTv"=>"Float64",
     "CTv"=>"Cdouble")
 
+
+#
+# amgcl_c guarantees that "DI" maps to Int32 and "DL" to Int64
+#
 const ltypedict=Dict(
     "IntChar"=> "L",
     "JTi"=>"Int64",
-    "CTi"=>"Clong")
+    "CTi"=>"Int64") 
 
 const itypedict=Dict(
     "IntChar"=> "I",
     "JTi"=>"Int32",
-    "CTi"=>"Cint")
+    "CTi"=>"Int32")
 
+const idxtypedicts=[ltypedict,itypedict]
 
-if Sys.WORD_SIZE == 64
-    const idxtypedicts=[ltypedict,itypedict]
-else
-    const idxtypedict=[itypedict]
-end    
-
+const numtypedicts=[dtypedict]
 #
 # Dicts which describe how to wrap operator names in C
 #
 const operatordicts=[]
 
-for method in operators
+for operator in operators
     for idxtypedict in idxtypedicts
-        for numtypedict in [dtypedict]
+        for numtypedict in numtypedicts
             TvTi=numtypedict["RealChar"]*idxtypedict["IntChar"]
             dict=Dict(
-                "Operator" => String(method),
+                "Operator" => String(operator),
                 "TvTi" => TvTi,
                 "JTv"  => numtypedict["JTv"],
                 "JTi"  => idxtypedict["JTi"],
@@ -73,6 +73,7 @@ end
 
 
 abstract type AbstractAMGCLOperator end
+
 #
 # Define operator types
 #
@@ -104,7 +105,7 @@ for operatordict in operatordicts
     CTi=Symbol(operatordict["CTi"])
     
     @eval begin
-        function finalize!(operator::$Operator{Tv,Ti}) where {Tv<:$JTv,Ti<:$JTi}
+        function finalize!(operator::$Operator{$JTv,$JTi}) 
             ccall(($amgclcTvTiOperatorDestroy,libamgcl_c),
                   Cvoid,
                   ($Operator{$JTv, $JTi},),
@@ -114,19 +115,19 @@ for operatordict in operatordicts
         #
         # Constructor from bunch of arrays
         #
-        function $Operator(n, ia::Vector{Ti}, ja::Vector{Ti}, a::Vector{Tv}, blocksize,param::String) where {Tv<:$JTv,Ti<:$JTi}
+        function $Operator(n, ia::Vector{$JTi}, ja::Vector{$JTi}, a::Vector{$JTv}, blocksize,param::String)
             this=ccall(($amgclcTvTiOperatorCreate,libamgcl_c),
                        $Operator{$JTv,$JTi},
                        (Cint, Ptr{$CTi}, Ptr{$CTi},Ptr{$CTv},Cint,Cstring),
                        n, ia,ja, a, blocksize, param);
-            finalizer(finalize!,this)
+                finalizer(finalize!,this)
             this
         end
         
         #
         # Solve matrix/preconditioning system
         #
-        function apply!(operator::$Operator{Tv,Ti}, sol::Vector{Tv}, rhs::Vector{Tv})  where {Tv<:$JTv,Ti<:$JTi}
+        function apply!(operator::$Operator{$JTv,$JTi}, sol::Vector{$JTv}, rhs::Vector{$JTv})
             if issolver(operator)
                 i=ccall(($amgclcTvTiOperatorApply,libamgcl_c),
                         AMGCLInfo,

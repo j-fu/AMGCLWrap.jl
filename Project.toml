@@ -11,7 +11,7 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 SparseMatricesCSR = "a0a7dd2c-ebf4-11e9-1f05-cf50bc540ca1"
 
 [compat]
-AMGCL_C_jll = "0.1.2"
+AMGCL_C_jll = "0.2.0"
 JSON3 = "1.14.0"
 LinearAlgebra = "1.6"
 SparseArrays = "1.6"
