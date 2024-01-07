@@ -70,6 +70,9 @@ end
 const NTest=10000
 
 @show Sys.WORD_SIZE
+@show sizeof(Cint)
+@show sizeof(Clong)
+@show sizeof(Clonglong)
 
 if Sys.WORD_SIZE == 64
     Tis=[Int32, Int64]
