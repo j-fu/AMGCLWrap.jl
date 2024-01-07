@@ -33,34 +33,34 @@ const dtypedict=Dict(
     "JTv"=>"Float64",
     "CTv"=>"Cdouble")
 
+
+#
+# amgcl_c guarantees that "DI" maps to Int32 and "DL" to Int64
+#
 const ltypedict=Dict(
     "IntChar"=> "L",
     "JTi"=>"Int64",
-    "CTi"=>"Clong")
+    "CTi"=>"Int64") 
 
 const itypedict=Dict(
     "IntChar"=> "I",
     "JTi"=>"Int32",
-    "CTi"=>"Cint")
+    "CTi"=>"Int32")
 
+const idxtypedicts=[ltypedict,itypedict]
 
-if Sys.WORD_SIZE == 64
-    const idxtypedicts=[ltypedict,itypedict]
-else
-    const idxtypedict=[itypedict]
-end    
-
+const numtypedicts=[dtypedict]
 #
 # Dicts which describe how to wrap operator names in C
 #
 const operatordicts=[]
 
-for method in operators
+for operator in operators
     for idxtypedict in idxtypedicts
-        for numtypedict in [dtypedict]
+        for numtypedict in numtypedicts
             TvTi=numtypedict["RealChar"]*idxtypedict["IntChar"]
             dict=Dict(
-                "Operator" => String(method),
+                "Operator" => String(operator),
                 "TvTi" => TvTi,
                 "JTv"  => numtypedict["JTv"],
                 "JTi"  => idxtypedict["JTi"],
@@ -73,6 +73,7 @@ end
 
 
 abstract type AbstractAMGCLOperator end
+
 #
 # Define operator types
 #
@@ -84,6 +85,10 @@ for Operator in operators
         end
     end
 end
+
+issolver(::Any)=false
+issolver(::AMGSolver)=true
+issolver(::RLXSolver)=true
 
 #
 # Define julia methods wrapping C functions
@@ -98,32 +103,44 @@ for operatordict in operatordicts
     JTi=Symbol(operatordict["JTi"])
     CTv=Symbol(operatordict["CTv"])
     CTi=Symbol(operatordict["CTi"])
-
+    
     @eval begin
+        function finalize!(operator::$Operator{$JTv,$JTi}) 
+            ccall(($amgclcTvTiOperatorDestroy,libamgcl_c),
+                  Cvoid,
+                  ($Operator{$JTv, $JTi},),
+                  operator)
+        end
+        
         #
         # Constructor from bunch of arrays
         #
-        function $Operator(n, ia::Vector{Ti}, ja::Vector{Ti}, a::Vector{Tv}, blocksize,param::String) where {Tv<:$JTv,Ti<:$JTi}
+        function $Operator(n, ia::Vector{$JTi}, ja::Vector{$JTi}, a::Vector{$JTv}, blocksize,param::String)
             this=ccall(($amgclcTvTiOperatorCreate,libamgcl_c),
                        $Operator{$JTv,$JTi},
                        (Cint, Ptr{$CTi}, Ptr{$CTi},Ptr{$CTv},Cint,Cstring),
                        n, ia,ja, a, blocksize, param);
-            finalizer(s->ccall(($amgclcTvTiOperatorDestroy,libamgcl_c),
-                               Cvoid,
-                               ($Operator{$JTv, $JTi},),
-                               s),this)
+                finalizer(finalize!,this)
             this
         end
-
+        
         #
         # Solve matrix/preconditioning system
         #
-        function apply!(s::$Operator{Tv,Ti}, sol::Vector{Tv}, rhs::Vector{Tv})  where {Tv<:$JTv,Ti<:$JTi}
-            i=ccall(($amgclcTvTiOperatorApply,libamgcl_c),
-                    AMGCLInfo,
-                    ($Operator{$JTv, $JTi},Ptr{$CTv}, Ptr{$CTv}),
-                    s,sol,rhs)
-            (iters=i.iters, residual=i.residual)
+        function apply!(operator::$Operator{$JTv,$JTi}, sol::Vector{$JTv}, rhs::Vector{$JTv})
+            if issolver(operator)
+                i=ccall(($amgclcTvTiOperatorApply,libamgcl_c),
+                        AMGCLInfo,
+                        ($Operator{$JTv, $JTi},Ptr{$CTv}, Ptr{$CTv}),
+                        operator,sol,rhs)
+                return (iters=i.iters, residual=i.residual)
+            else
+                ccall(($amgclcTvTiOperatorApply,libamgcl_c),
+                      Cvoid,
+                      ($Operator{$JTv, $JTi},Ptr{$CTv}, Ptr{$CTv}),
+                      operator,sol,rhs)
+                return nothing
+            end
         end
     end
 end
@@ -131,12 +148,17 @@ end
 #
 # Linear Algebra solution methods
 #
-function LinearAlgebra.ldiv!(u, s::AbstractAMGCLOperator, v)
-    apply!(s,u,v)
+function LinearAlgebra.ldiv!(u, operator::AbstractAMGCLOperator, v)
+    apply!(operator,u,v)
     u
 end
-LinearAlgebra.ldiv!(s::AbstractAMGCLOperator, v) = v.=ldiv!(copy(v),s,v)
-LinearAlgebra.:\(s::AbstractAMGCLOperator, v) = ldiv!(copy(v),s,v)
+function LinearAlgebra.ldiv!(operator::AbstractAMGCLOperator, v)
+    u=ldiv!(copy(v),operator,v)
+    v.=u
+    nothing
+end
+
+LinearAlgebra.:\(operator::AbstractAMGCLOperator, v) = ldiv!(copy(v),operator,v)
 
 
 #
@@ -161,11 +183,12 @@ for Operator in operators
             myoffset=1-getoffset(Bi)
             csr.rowptr.-=myoffset
             csr.colval.-=myoffset
-            s=$Operator(csr.m, csr.rowptr,csr.colval,csr.nzval,blocksize,tojson(param))
+            operator=$Operator(csr.m, csr.rowptr,csr.colval,csr.nzval,blocksize,tojson(param))
             csr.rowptr.+=myoffset
             csr.colval.+=myoffset
-            return s
+            return operator
         end
+
         function $Operator(csc::SparseArrays.AbstractSparseMatrixCSC{Tv,Ti}; blocksize=1,param=nothing) where {Tv,Ti}
             $Operator(SparseMatrixCSR{1}(transpose(SparseMatrixCSC(csc)));blocksize,param)
         end

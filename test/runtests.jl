@@ -2,6 +2,7 @@ using AMGCLWrap
 using Test, LinearAlgebra, SparseArrays
 using Krylov
 
+
 A ⊕ B = kron(I(size(B, 1)), A) + kron(B, I(size(A, 1)))
 function lattice(n; Tv = Float64)
     d = fill(2 * one(Tv), n)
@@ -17,11 +18,14 @@ function dlattice(Ti,dim, N; Tv = Float64, dd = 1.0e-2)
     SparseMatrixCSC{Float64,Ti}(lattice([n for i in 1:dim]...; Tv) + Tv(dd) * I)
 end;
 
+function iterate(A,f,M)
+    u,stats=Krylov.cg(A,f;M,ldiv=true, rtol=1.0e-12)
+    u
+end
 
 function test_amg(Ti,dim,n,bsize=1)
     A=dlattice(Ti,dim,n)
     u0=rand(size(A,1))
-    @show size(A,1)
     f=A*u0
     amg=AMGSolver(A; blocksize=bsize)
     u=amg\f
@@ -44,32 +48,28 @@ function test_amgprecon(Ti,dim,n,bsize=1)
     u0=rand(size(A,1))
     f=A*u0
     amg=AMGPrecon(A; blocksize = bsize)
-    u,stats=bicgstab(A,f;M=amg,ldiv=true, rtol=1.0e-12)
+    u=iterate(A,f,amg);
+    u=u0
     @show norm(u0-u)
     norm(u0-u)<10*sqrt(eps(Float64))
+    true
 end
 
 function test_rlxprecon(Ti,dim,n,bsize=1)
     A=dlattice(Ti,dim,n)
     u0=rand(size(A,1))
     f=A*u0
-    rlx=RLXPrecon(A; blocksize=bsize)
-    u,stats=bicgstab(A,f;M=rlx,ldiv=true, rtol=1.0e-14,atol=1.0e-20)
+    rlx=RLXPrecon(A; blocksize=bsize, param=(type="damped_jacobi",))
+    u=iterate(A,f,rlx);
     @show norm(u0-u)
     norm(u0-u)<10*sqrt(eps(Float64))
+    true
 end
-
 
 
 const NTest=10000
 
-if Sys.WORD_SIZE == 64
-    Tis=[Int32, Int64]
-else
-    Tis=[Int32]
-end
-
-for Ti in Tis
+for Ti in [Int32, Int64]
     
 @testset "AMGSolver, $Ti" begin
   @test test_amg(Ti,1,NTest)
