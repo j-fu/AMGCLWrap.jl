@@ -167,7 +167,9 @@ LinearAlgebra.:\(operator::AbstractAMGCLOperator, v) = ldiv!(copy(v),operator,v)
 for Operator in operators
     @eval begin
         @doc """
+           ```
            $($Operator)(sparsematrix; blocksize=1, param=nothing)
+           ```
 
            $(docs[string($Operator)])
 

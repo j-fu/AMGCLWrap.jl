@@ -13,9 +13,9 @@ end
 
 lattice(L...; Tv = Float64) = lattice(L[1]; Tv) ⊕ lattice(L[2:end]...; Tv)
 
-function dlattice(Ti,dim, N; Tv = Float64, dd = 1.0e-2)
+function dlattice(dim, N; Tv = Float64, Ti=Int64, dd = 1.0e-2)
     n = N^(1 / dim) |> ceil |> Int
-    SparseMatrixCSC{Float64,Ti}(lattice([n for i in 1:dim]...; Tv) + Tv(dd) * I)
+    SparseMatrixCSC{Tv,Ti}(lattice([n for i in 1:dim]...; Tv) + Tv(dd) * I)
 end;
 
 function iterate(A,f,M)
@@ -24,7 +24,7 @@ function iterate(A,f,M)
 end
 
 function test_amg(Ti,dim,n,bsize=1)
-    A=dlattice(Ti,dim,n)
+    A=dlattice(dim,n;Ti)
     u0=rand(size(A,1))
     f=A*u0
     amg=AMGSolver(A; blocksize=bsize)
@@ -34,7 +34,7 @@ function test_amg(Ti,dim,n,bsize=1)
 end
 
 function test_rlx(Ti,dim,n,bsize=1)
-    A=dlattice(Ti,dim,n)
+    A=dlattice(dim,n;Ti)
     u0=rand(size(A,1))
     f=A*u0
     rlx=RLXSolver(A;blocksize= bsize, param=(solver=(tol=1.0e-12,type="bicgstab"), precond=(type="ilu0",)))
@@ -44,7 +44,7 @@ function test_rlx(Ti,dim,n,bsize=1)
 end
 
 function test_amgprecon(Ti,dim,n,bsize=1)
-    A=dlattice(Ti,dim,n)
+    A=dlattice(dim,n;Ti)
     u0=rand(size(A,1))
     f=A*u0
     amg=AMGPrecon(A; blocksize = bsize)
@@ -56,7 +56,7 @@ function test_amgprecon(Ti,dim,n,bsize=1)
 end
 
 function test_rlxprecon(Ti,dim,n,bsize=1)
-    A=dlattice(Ti,dim,n)
+    A=dlattice(dim,n; Ti)
     u0=rand(size(A,1))
     f=A*u0
     rlx=RLXPrecon(A; blocksize=bsize, param=(type="damped_jacobi",))
