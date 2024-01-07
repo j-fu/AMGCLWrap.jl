@@ -68,7 +68,8 @@ end
 
 
 const NTest=10000
-
+A0=sprand(10,10,0.1)
+@show typeof(A0)
 @show Sys.WORD_SIZE
 @show sizeof(Cint)
 @show sizeof(Clong)
