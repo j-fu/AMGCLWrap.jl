@@ -75,11 +75,7 @@ A0=sprand(10,10,0.1)
 @show sizeof(Clong)
 @show sizeof(Clonglong)
 
-if Sys.WORD_SIZE == 64
-    Tis=[Int32, Int64]
-else
-    Tis=[Int32]
-end
+Tis=[Int32, Int64]
 
 for Ti in Tis
     
