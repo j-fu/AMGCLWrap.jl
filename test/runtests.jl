@@ -69,6 +69,8 @@ end
 
 const NTest=10000
 
+@show Sys.WORD_SIZE
+
 if Sys.WORD_SIZE == 64
     Tis=[Int32, Int64]
 else
