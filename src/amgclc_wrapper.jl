@@ -33,10 +33,11 @@ const dtypedict=Dict(
     "JTv"=>"Float64",
     "CTv"=>"Cdouble")
 
+
 const ltypedict=Dict(
     "IntChar"=> "L",
     "JTi"=>"Int64",
-    "CTi"=>"Clong")
+    "CTi"=>sizeof(Clong)==8 ? "Clong" : "Clonglong")
 
 const itypedict=Dict(
     "IntChar"=> "I",
