@@ -34,7 +34,7 @@ jobs:
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
-      -2  run: |
+      -  run: |
              julia  test/addnursery.jl
       - uses: julia-actions/cache@v1
       - uses: julia-actions/julia-buildpkg@v1
