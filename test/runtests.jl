@@ -85,6 +85,12 @@ const NTest=10000
   @test test_err(Int64,1,NTest)
 end
 
+@testset "blocksizes" begin
+  @test blocksize_instantiated(1)
+  @test blocksize_instantiated(2)
+  @test !blocksize_instantiated(100)
+end
+
 for Ti in [Int32, Int64]
     
 @testset "AMGSolver, $Ti" begin

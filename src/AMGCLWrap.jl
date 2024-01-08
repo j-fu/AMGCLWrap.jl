@@ -8,7 +8,7 @@ import JSON3
 
 include("amgclc_wrapper.jl")
 
-export AMGSolver,RLXSolver,AMGPrecon,RLXPrecon
+export AMGSolver,RLXSolver,AMGPrecon,RLXPrecon, blocksize_instantiated
 
 end
 

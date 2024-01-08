@@ -12,6 +12,9 @@ tojson(param)=JSON3.write(param)
 tojson(::Nothing)=""
 tojson(s::String)=s
 
+
+blocksize_instantiated(blocksize) = ccall( (:amgclcBlocksizeInstantiated, libamgcl_c), Cint, (Cint,), blocksize)==1
+
 #
 # Operators to be created 
 #
