@@ -35,10 +35,9 @@ jobs:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
       - name: Configure test environment
-        shell: julia --project --color=yes {0}
+        shell: julia --color=yes {0}
         run: |
           using Pkg
-          Pkg.Registry.add("General")
           Pkg.Registry.add(RegistrySpec(url = "https://github.com/j-fu/PackageNursery"))
       - uses: julia-actions/cache@v1
       - uses: julia-actions/julia-buildpkg@v1
