@@ -10,7 +10,6 @@ using DocStringExtensions
 include("amgclc_wrapper.jl")
 include("struct_api.jl")
 
-export AMGSolver,RLXSolver,AMGPrecon,RLXPrecon, blocksize_instantiated, error_state
+export AMGSolver, RLXSolver, AMGPrecon, RLXPrecon, blocksize_instantiated, error_state
 
 end
-
