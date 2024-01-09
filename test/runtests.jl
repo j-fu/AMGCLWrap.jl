@@ -71,7 +71,7 @@ function test_err(Ti,dim,n,bsize=1)
     u0=rand(size(A,1))
     f=A*u0
     rlx=RLXSolver(A;blocksize= bsize, param=(solver=(tol=1.0e-12,type="bicgstab"), precond=(type="ilu0x",)))
-    if rlx.error_state!=0
+    if error_state(rlx)!=0
         println("error catched")
         return true
     end
@@ -84,6 +84,23 @@ const NTest=10000
 @testset "catch error" begin
   @test test_err(Int64,1,NTest)
 end
+
+@testset "blocksizes" begin
+  @test blocksize_instantiated(1)
+  @test blocksize_instantiated(2)
+  @test !blocksize_instantiated(100)
+end
+
+
+@testset "struct API" begin
+    A=dlattice(3,NTest)
+    u0=rand(size(A,1))
+    f=A*u0
+    @test isa(AMGSolver(A,coarsening=AMGCLWrap.RugeStubenCoarsening())\f, Vector)
+    @test isa(RLXSolver(A,solver=AMGCLWrap.CGSolver())\f, Vector)
+    @test isa(RLXSolver(A,solver=(type="cg",))\f, Vector)
+end
+
 
 for Ti in [Int32, Int64]
     
@@ -119,3 +136,5 @@ end
 end
 
 end
+
+
