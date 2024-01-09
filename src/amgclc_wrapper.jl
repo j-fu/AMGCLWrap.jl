@@ -172,16 +172,18 @@ LinearAlgebra.:\(operator::AbstractAMGCLOperator, v) = ldiv!(copy(v),operator,v)
 for Operator in operators
     @eval begin
         @doc """
-           ```
-           $($Operator)(sparsematrix; blocksize=1, param=nothing)
-           ```
+
+             $($Operator)(sparsematrix::AbstractSparseMatrix; 
+                          blocksize=1, 
+                          param=nothing)
+
 
            $(docs[string($Operator)])
 
-           Input: 
+           Parameters:
             - `sparsematrix`: `SparseArrays.AbstractSparseMatrixCSC` or `SparseMatricesCSR.SparseMatrixCSR`. 
             - `blocksize`: If blocksize >1, group unknowns into blocks of given size and cast the matrix internally to a sparse matrix of        `blocksize x blocksize` static matrices. Block sizes 1...8 are instantiated.
-            - `params`: Any object (e.g. Tuple, Dict or JSON string) which can be turned into a JSON string by `JSON3.write`. If `params` is an emtpy string or `nothing` a default value is used.
+            - `param`: Any object (e.g. Tuple, Dict or JSON string) which can be turned into a JSON string by `JSON3.write`. If `params` is an emtpy string or `nothing` a default value is used.
          """
         function $Operator(csr::SparseMatrixCSR{Bi,Tv,Ti}, param; blocksize=1) where {Bi,Tv,Ti}
             if csr.m!=csr.n

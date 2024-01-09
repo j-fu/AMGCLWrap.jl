@@ -4,7 +4,7 @@
 
 # AMGCLWrap
 
-Julia wrapper around  [AMGCL](https://github.com/ddemidov/amgcl) via the C wrapper [AMGCL_C](https://github.com/j-fu/amgcl_c).
+Julia wrapper around a subset of [AMGCL](https://github.com/ddemidov/amgcl) via the C wrapper [AMGCL_C](https://github.com/j-fu/amgcl_c).
 
 If you find this package useful, please  [give credits](https://github.com/ddemidov/amgcl?tab=readme-ov-file#referencing) to the author of AMGCL.
 

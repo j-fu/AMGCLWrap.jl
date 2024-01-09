@@ -5,6 +5,7 @@ using SparseArrays
 using LinearAlgebra
 import JSON3
 using CompositeStructs: @composite
+using DocStringExtensions
 
 include("amgclc_wrapper.jl")
 include("struct_api.jl")
