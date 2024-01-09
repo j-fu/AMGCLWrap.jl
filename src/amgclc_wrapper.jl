@@ -1,6 +1,5 @@
-# 
-# Iteration info returned by solver application methods
-#
+
+# iteration/solver info returned by amgcl_c
 struct AMGCLInfo
     iters::Cint
     residual::Cdouble
@@ -13,6 +12,12 @@ tojson(::Nothing)=""
 tojson(s::String)=s
 
 
+
+"""
+    blocksize_instantiated(blocksize)::Bool
+
+Check if given blocksize has been instantiated.
+"""
 blocksize_instantiated(blocksize) = ccall( (:amgclcBlocksizeInstantiated, libamgcl_c), Cint, (Cint,), blocksize)==1
 
 #
@@ -77,6 +82,12 @@ end
 
 abstract type AbstractAMGCLOperator end
 
+"""
+    error_state(operator)::Int
+Return error state of operator. Ok if 0.
+"""
+error_state(o::AbstractAMGCLOperator)= o.error_state
+
 #
 # Define operator types
 #
@@ -90,6 +101,7 @@ for Operator in operators
     end
 end
 
+    
 issolver(::Any)=false
 issolver(::AMGSolver)=true
 issolver(::RLXSolver)=true
@@ -127,10 +139,7 @@ for operatordict in operatordicts
                 finalizer(finalize!,this)
             this
         end
-        
-        #
-        # Solve matrix/preconditioning system
-        #
+
         function apply!(operator::$Operator{$JTv,$JTi}, sol::Vector{$JTv}, rhs::Vector{$JTv})
              info=ccall(($amgclcTvTiOperatorApply,libamgcl_c),
                          AMGCLInfo,
@@ -174,7 +183,7 @@ for Operator in operators
             - `blocksize`: If blocksize >1, group unknowns into blocks of given size and cast the matrix internally to a sparse matrix of        `blocksize x blocksize` static matrices. Block sizes 1...8 are instantiated.
             - `params`: Any object (e.g. Tuple, Dict or JSON string) which can be turned into a JSON string by `JSON3.write`. If `params` is an emtpy string or `nothing` a default value is used.
          """
-        function $Operator(csr::SparseMatrixCSR{Bi,Tv,Ti}; blocksize=1, param=nothing) where {Bi,Tv,Ti}
+        function $Operator(csr::SparseMatrixCSR{Bi,Tv,Ti}, param; blocksize=1) where {Bi,Tv,Ti}
             if csr.m!=csr.n
                 error("Matrix must be square")
             end
@@ -187,8 +196,8 @@ for Operator in operators
             return operator
         end
 
-        function $Operator(csc::SparseArrays.AbstractSparseMatrixCSC{Tv,Ti}; blocksize=1,param=nothing) where {Tv,Ti}
-            $Operator(SparseMatrixCSR{1}(transpose(SparseMatrixCSC(csc)));blocksize,param)
+        function $Operator(csc::SparseArrays.AbstractSparseMatrixCSC{Tv,Ti},param; blocksize=1) where {Tv,Ti}
+            $Operator(SparseMatrixCSR{1}(transpose(SparseMatrixCSC(csc))),param; blocksize)
         end
     end
 end

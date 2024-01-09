@@ -11,6 +11,8 @@ AMGSolver
 RLXSolver
 AMGPrecon
 RLXPrecon
+error_state
+blocksize_instantiated
 ```
 
 
