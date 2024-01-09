@@ -98,6 +98,7 @@ end
     f=A*u0
     @test isa(AMGSolver(A,coarsening=AMGCLWrap.RugeStubenCoarsening())\f, Vector)
     @test isa(RLXSolver(A,solver=AMGCLWrap.CGSolver())\f, Vector)
+    @test isa(RLXSolver(A,solver=(type="cg",))\f, Vector)
 end
 
 

@@ -2,6 +2,7 @@ abstract type AbstractAMGCLParams end
 
 
 abstract type AbstractCoarsening <: AbstractAMGCLParams end
+const AbstractCoarseningOrNamedTuple = Union{AbstractCoarsening, NamedTuple}
 
 Base.@kwdef struct SmoothedAggregationCoarsening <: AbstractCoarsening
     type::String="smoothed_aggregation"
@@ -16,6 +17,7 @@ Base.@kwdef struct RugeStubenCoarsening <: AbstractCoarsening
 end
 
 abstract type AbstractRelaxation <: AbstractAMGCLParams end
+const AbstractRelaxationOrNamedTuple = Union{AbstractRelaxation, NamedTuple}
 
 Base.@kwdef struct SPAI0Relaxation <: AbstractRelaxation
    type::String="spai0"       
@@ -25,8 +27,9 @@ Base.@kwdef struct ILU0Relaxation <: AbstractRelaxation
    type::String="ilu0"       
 end
 
-
 abstract type AbstractSolver <: AbstractAMGCLParams end
+const AbstractSolverOrNamedTuple = Union{AbstractSolver, NamedTuple}
+
 
 Base.@kwdef struct SolverControl
     tol::Float64=1.0e-10
@@ -60,9 +63,9 @@ function AMGSolver(A::AbstractMatrix;
                    param=nothing,
                    verbose::Bool=false,
                    blocksize::Int=1,
-                   coarsening::AbstractCoarsening=SmoothedAggregationCoarsening(),
-                   relaxation::AbstractRelaxation=SPAI0Relaxation(),
-                   solver::AbstractSolver=BICGStabSolver(;verbose))
+                   coarsening::AbstractCoarseningOrNamedTuple=SmoothedAggregationCoarsening(),
+                   relaxation::AbstractRelaxationOrNamedTuple=SPAI0Relaxation(),
+                   solver::AbstractSolverOrNamedTuple=BICGStabSolver(;verbose))
     if param==nothing
             param=(solver=solver, precond=(coarsening=coarsening,relax=relaxation))
     end
@@ -74,10 +77,10 @@ end
     
 function RLXSolver(A::AbstractMatrix;
                    param=nothing,
-                   verbose::Bool=false,
+                   verbose::Bool=true,
                    blocksize::Int=1,
-                   precond::AbstractRelaxation=SPAI0Relaxation(),
-                   solver::AbstractSolver=BICGStabSolver(;verbose))
+                   precond::AbstractRelaxationOrNamedTuple=SPAI0Relaxation(),
+                   solver::AbstractSolverOrNamedTuple=BICGStabSolver(;verbose))
     if param==nothing
         param=(solver=solver, precond=precond)
     end
@@ -91,8 +94,8 @@ function AMGPrecon(A::AbstractMatrix;
                    param=nothing,
                    verbose::Bool=false,
                    blocksize::Int=1,
-                   coarsening::AbstractCoarsening=SmoothedAggregationCoarsening(),
-                   relax::AbstractRelaxation=SPAI0Relaxation())
+                   coarsening::AbstractCoarseningOrNamedTuple=SmoothedAggregationCoarsening(),
+                   relax::AbstractRelaxationOrNamedTuple=SPAI0Relaxation())
     if param==nothing
         param=(coarsening=coarsening,relax=relax)
     end
@@ -106,7 +109,7 @@ function RLXPrecon(A::AbstractMatrix;
                    param=nothing,
                    verbose::Bool=false,
                    blocksize::Int=1,
-                   precond::AbstractRelaxation=SPAI0Relaxation())
+                   precond::AbstractRelaxationOrNamedTuple=SPAI0Relaxation())
     if param==nothing
          param=relaxation
     end
