@@ -66,8 +66,24 @@ function test_rlxprecon(Ti,dim,n,bsize=1)
     true
 end
 
+function test_err(Ti,dim,n,bsize=1)
+    A=dlattice(dim,n;Ti)
+    u0=rand(size(A,1))
+    f=A*u0
+    rlx=RLXSolver(A;blocksize= bsize, param=(solver=(tol=1.0e-12,type="bicgstab"), precond=(type="ilu0x",)))
+    if rlx.error_state!=0
+        println("error catched")
+        return true
+    end
+    return false
+end
+
 
 const NTest=10000
+
+@testset "catch error" begin
+  @test test_err(Int64,1,NTest)
+end
 
 for Ti in [Int32, Int64]
     

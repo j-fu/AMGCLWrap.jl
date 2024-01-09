@@ -4,8 +4,8 @@
 struct AMGCLInfo
     iters::Cint
     residual::Cdouble
+    error_state::Cint
 end
-
 
 # Create json string from Tuple, Dict, String or Nothing
 tojson(param)=JSON3.write(param)
@@ -82,6 +82,7 @@ for Operator in operators
         mutable struct $Operator{Tv,Ti} <: AbstractAMGCLOperator
             handle::Ptr{Cvoid}
             blocksize::Cint
+            error_state::Cint
         end
     end
 end
@@ -128,19 +129,11 @@ for operatordict in operatordicts
         # Solve matrix/preconditioning system
         #
         function apply!(operator::$Operator{$JTv,$JTi}, sol::Vector{$JTv}, rhs::Vector{$JTv})
-            if issolver(operator)
-                i=ccall(($amgclcTvTiOperatorApply,libamgcl_c),
-                        AMGCLInfo,
+             info=ccall(($amgclcTvTiOperatorApply,libamgcl_c),
+                         AMGCLInfo,
                         ($Operator{$JTv, $JTi},Ptr{$CTv}, Ptr{$CTv}),
                         operator,sol,rhs)
-                return (iters=i.iters, residual=i.residual)
-            else
-                ccall(($amgclcTvTiOperatorApply,libamgcl_c),
-                      Cvoid,
-                      ($Operator{$JTv, $JTi},Ptr{$CTv}, Ptr{$CTv}),
-                      operator,sol,rhs)
-                return nothing
-            end
+             return (iters=info.iters, residual=info.residual, error_state=info.error_state)
         end
     end
 end
