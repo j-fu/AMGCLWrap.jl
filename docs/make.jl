@@ -14,6 +14,11 @@ makedocs(;
                                   canonical = "https://j-fu.github.io/AMGCLWrap.jl",
                                   edit_link = "main",
                                   assets = String[],),
-         pages = ["Home" => "index.md"],)
+         pages = ["Home" => "index.md"
+                  "solvers.md"
+                  "preconditioners.md"
+                  "parameters.md"
+                  "misc.md"
+                  ],)
 
 deploydocs(; repo = "github.com/j-fu/AMGCLWrap.jl", devbranch = "main")

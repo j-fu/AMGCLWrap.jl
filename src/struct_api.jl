@@ -1,135 +1,28 @@
-#####################################################################
-# Apex parameter type
+################################################################################################
+# Docstring snippets
 
-"""
-    $(TYPEDEF)
-
-Abstract parameter type.
-"""
-abstract type AbstractAMGCLParams end
-
-Base.show(io::IO, p::AbstractAMGCLParams) = JSON3.pretty(io, p)
-
-#####################################################################
-# Iterative solvers
-
-"""
-    $(TYPEDEF)
-
-Abstract solver parameter type.
-"""
-abstract type AbstractSolver <: AbstractAMGCLParams end
-
-Base.@kwdef struct SolverControl
-    """
-    Relative tolerance
-    """
-    tol::Float64 = 1.0e-10
-    abstol::Float64 = floatmin(Float64)
-    maxiter::Int = 100
-    verbose::Bool = false
-end
-
-"""
-    $(TYPEDEF)
-
-BICGStab solver
-$(TYPEDFIELDS)
-"""
-@composite Base.@kwdef struct BICGStabSolver <: AbstractSolver
-    type::String = "bicgstab"
-    pside::String = "right"
-    SolverControl...
-end
-
-"""
-    $(TYPEDEF)
-
-$(TYPEDFIELDS)
-"""
-@composite Base.@kwdef struct GMRESSolver <: AbstractSolver
-    type::String = "gmres"
-    M::Int = 30
-    pside::String = "right"
-    SolverControl...
-end
-
-"""
-    $(TYPEDEF)
-
-$(TYPEDFIELDS)
-"""
-@composite Base.@kwdef struct CGSolver <: AbstractSolver
-    type::String = "cg"
-    SolverControl...
-end
-
-########################################################################
-# Relaxation/Preconditioning    
-
-"""
-    $(TYPEDEF)
-
-Abstract relaxation parameter type.
-"""
-abstract type AbstractRelaxation <: AbstractAMGCLParams end
-
-"""
-    $(TYPEDEF)
-
-$(TYPEDFIELDS)
-"""
-Base.@kwdef struct SPAI0Relaxation <: AbstractRelaxation
-    type::String = "spai0"
-end
-
-"""
-    $(TYPEDEF)
-
-$(TYPEDFIELDS)
-"""
-Base.@kwdef struct ILU0Relaxation <: AbstractRelaxation
-    type::String = "ilu0"
-end
-
-#####################################################################
-# Coarsening
-
-"""
-    $(TYPEDEF)
-
-Abstract coarsening parameter type.
-"""
-abstract type AbstractCoarsening <: AbstractAMGCLParams end
-
-"""
-    $(TYPEDEF)
-
-$(TYPEDFIELDS)
-"""
-Base.@kwdef struct SmoothedAggregationCoarsening <: AbstractCoarsening
-    type::String = "smoothed_aggregation"
-    relax::Float64 = 1.0
-end
-
-"""
-    $(TYPEDEF)
-
-$(TYPEDFIELDS)
-"""
-Base.@kwdef struct RugeStubenCoarsening <: AbstractCoarsening
-    type::String = "ruge_stuben"
-    eps_strong::Float64 = 0.25
-    do_trunc::Bool = true
-    eps_trunc::Float64 = 0.2
-end
+const matrixparam="""
+                  - `sparsematrix`: `SparseArrays.AbstractSparseMatrixCSC` or `SparseMatricesCSR.SparseMatrixCSR`. 
+                  """
 
 const stdparams = """
                   - `sparsematrix`: `SparseArrays.AbstractSparseMatrixCSC` or `SparseMatricesCSR.SparseMatrixCSR`. 
-                  - `blocksize`: If blocksize >1, group unknowns into blocks of given size and cast the matrix internally to a sparse matrix of        `blocksize x blocksize` static matrices. Block sizes 1...8 are instantiated.
-                  - `param:`   Ignored if `nothing` (default). Otherwise, any object (e.g. Tuple, Dict or JSON string) which can be turned into a JSON string by `JSON3.write`.
+                  - `blocksize`: If blocksize >1, group unknowns into blocks of given size and cast the matrix internally to a sparse matrix of `blocksize x blocksize` static matrices. Block sizes 1...8 are instantiated.
                   - `verbose`: if true, print generated JSON string passed to amgcl.
+                  - `param:`   Ignored if `nothing` (default). Otherwise, any object (e.g. Tuple, Dict or JSON string) which can be turned into a JSON string by `JSON3.write`.
                   """
+const amgsolverparams= """
+                       - `coarsening`: One of the  [Coarsening strategies](@ref)
+                       - `relax`: One of the [Relaxation strategies](@ref)
+                       - `solver`: One of the [Iterative solver strategies](@ref)
+                       """    
+const rlxsolverparams= """
+                       - `precond`: One of the [Relaxation strategies](@ref) seen as preconditioner
+                       - `solver`: One of the [Iterative solver strategies](@ref)
+                       """    
+
+#################################################################################################
+# AMG Solver
 
 """
     AMGSolver(sparsematrix::AbstractSparseMatrix;
@@ -142,10 +35,9 @@ const stdparams = """
 $(docs["AMGCLWrap.AMGSolver"])
 
 Parameters:
+$(matrixparam)
 $(stdparams)
-- `coarsening`: A [coarsening strategy](#Coarsening-strategies)
-- `relax`: A [relaxation method](#Relaxation/Preconditioner-parameters)
-- `solver`: An [iterative solver](#Solver-parameters)
+$(amgsolverparams)
 """
 function AMGSolver(sparsematrix::AbstractSparseMatrix;
                    param = nothing,
@@ -163,25 +55,68 @@ function AMGSolver(sparsematrix::AbstractSparseMatrix;
     AMGSolver(sparsematrix, param; blocksize)
 end
 
+@static if VERSION >=v"1.9.0"
+
+Base.@kwdef mutable struct AMGSolverAlgorithmData
+    param = nothing
+    verbose::Bool = false
+    blocksize::Int = 1
+    coarsening::Union{AbstractCoarsening, NamedTuple} = SmoothedAggregationCoarsening()
+    relax::Union{AbstractRelaxation, NamedTuple} = SPAI0Relaxation()
+    solver::Union{AbstractSolver, NamedTuple} = BICGStabSolver(; verbose)
+    instance=nothing
+end
+
+function (data::AMGSolverAlgorithmData)(A, b, u, p, newA, Pl, Pr, solverdata; verbose = true, kwargs...)
+    (;param,verbose,blocksize,solver,coarsening,relax)=data
+    if data.instance==nothing || newA
+        data.instance=AMGSolver(A;param,verbose,blocksize,solver,relax,coarsening)
+    end
+    ldiv!(u,data.instance,b)
+end
+
+    
+end # @static if
+
+"""
+    AMGSolverAlgorithm(;blocksize::Int=1,
+                        param=nothing,
+                        verbose::Bool=false,
+                        coarsening::Union{AbstractCoarsening, NamedTuple}=SmoothedAggregationCoarsening(),
+                        relax::Union{AbstractRelaxation, NamedTuple}=SPAI0Relaxation(),
+                        solver::Union{AbstractSolver, NamedTuple}=BICGStabSolver(;verbose))
+
+Algebraic multigrid preconditioned Krylov subspace solver algorithm for LinearSolve.jk
+Parameters:
+$(stdparams)
+$(amgsolverparams)
+
+!!! compat
+    Only available for Julia version >=1.9
+"""
+function AMGSolverAlgorithm end
+
+#################################################################################################
+# Relaxation  Solver
 """
     RLXSolver(sparsematrix::AbstractSparseMatrix;
               blocksize::Int=1,
               param=nothing,
               verbose::Bool=false,
-              precond::Union{AbstractRelaxation, NamedTuple}=SPAI0Relaxation(),
+              precond::Union{AbstractRelaxation, NamedTuple}=ILU0Relaxation(),
               solver::Union{AbstractSolver, NamedTuple}=BICGStabSolver(;verbose))
 $(docs["AMGCLWrap.RLXSolver"])
 
 Parameters:
+$(matrixparam)
 $(stdparams)
-- `precond`: A [preconditioned method](#Relaxation/Preconditioner-parameters)
-- `solver`: An [iterative solver](#Solver-parameters)
+$(rlxsolverparams)
 """
 function RLXSolver(sparsematrix::AbstractSparseMatrix;
                    param = nothing,
                    verbose::Bool = false,
                    blocksize::Int = 1,
-                   precond::Union{AbstractRelaxation, NamedTuple} = SPAI0Relaxation(),
+                   precond::Union{AbstractRelaxation, NamedTuple} = ILU0Relaxation(),
                    solver::Union{AbstractSolver, NamedTuple} = BICGStabSolver())
     if param == nothing
         param = (solver = solver, precond = precond)
@@ -191,6 +126,51 @@ function RLXSolver(sparsematrix::AbstractSparseMatrix;
     end
     RLXSolver(sparsematrix, param; blocksize)
 end
+
+
+@static if VERSION >=v"1.9.0"
+
+Base.@kwdef mutable struct RLXSolverAlgorithmData
+    param = nothing
+    verbose::Bool = false
+    blocksize::Int = 1
+    precond::Union{AbstractRelaxation, NamedTuple} = SPAI0Relaxation()
+    solver::Union{AbstractSolver, NamedTuple} = BICGStabSolver(; verbose)
+    instance=nothing
+end
+
+function (data::RLXSolverAlgorithmData)(A, b, u, p, newA, Pl, Pr, solverdata; verbose = true, kwargs...)
+    (;param,verbose,blocksize,solver,precond)=data
+    if data.instance==nothing || newA
+        data.instance=RLXSolver(A;param,verbose,blocksize,solver,precond)
+    end
+    ldiv!(u,data.instance,b)
+end
+
+end # @static if
+
+
+
+"""
+    RLXSolverAlgorithm(;blocksize::Int=1,
+                        param=nothing,
+                        verbose::Bool=false,
+                        precond::Union{AbstractRelaxation, NamedTuple}=ILU0Relaxation(),
+                        solver::Union{AbstractSolver, NamedTuple}=BICGStabSolver(;verbose))
+
+Algebraic multigrid preconditioned Krylov subspace solver algorithm for LinearSolve.jk
+Parameters:
+$(stdparams)
+$(rlxsolverparams)
+
+!!! compat
+    Only available for Julia version >=1.9
+"""
+function RLXSolverAlgorithm end
+
+    
+#################################################################################################
+# AMG Preconditioner
 
 """
    AMGPrecon(sparsematrix::AbstractSparseMatrix;
@@ -202,6 +182,7 @@ end
 $(docs["AMGCLWrap.AMGPrecon"])
 
 Parameters:
+$(matrixparam)
 $(stdparams)
 - `coarsening`: A [coarsening strategy](#Coarsening-strategies)
 - `relax`: A [relaxation method](#Relaxation/Preconditioner-parameters)
@@ -230,19 +211,25 @@ end
 $(docs["AMGCLWrap.RLXPrecon"])
 
 Parameters:
+$(matrixparam)
 $(stdparams)
 - `precond`: A [preconditioned method](#Relaxation/Preconditioner-parameters)
 """
+
+#################################################################################################
+# Relaxation Preconditioner
+
 function RLXPrecon(sparsematrix::AbstractSparseMatrix;
                    param = nothing,
                    verbose::Bool = false,
                    blocksize::Int = 1,
                    precond::Union{AbstractRelaxation, NamedTuple} = SPAI0Relaxation())
     if param == nothing
-        param = relaxation
+        param = precond
     end
     if verbose
         JSON3.pretty(param)
     end
     RLXPrecon(sparsematrix, param; blocksize)
 end
+

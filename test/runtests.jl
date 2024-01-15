@@ -1,6 +1,7 @@
 using AMGCLWrap
 using Test, LinearAlgebra, SparseArrays
 using Krylov
+using LinearSolve
 
 A ⊕ B = kron(I(size(B, 1)), A) + kron(B, I(size(A, 1)))
 function lattice(n; Tv = Float64)
@@ -50,7 +51,6 @@ function test_amgprecon(Ti, dim, n, bsize = 1)
     f = A * u0
     amg = AMGPrecon(A; blocksize = bsize)
     u = iterate(A, f, amg)
-    u = u0
     @show norm(u0 - u)
     norm(u0 - u) < 10 * sqrt(eps(Float64))
     true
@@ -80,6 +80,12 @@ function test_err(Ti, dim, n, bsize = 1)
     end
     return false
 end
+
+
+
+
+
+
 
 const NTest = 10000
 
@@ -133,4 +139,69 @@ for Ti in [Int32, Int64]
         @test test_amgprecon(Ti, 3, NTest, 2)
         @test test_rlxprecon(Ti, 3, NTest, 2)
     end
+end
+
+
+
+
+
+
+
+function test_linsolve_amg(Ti, dim, n, bsize = 1)
+    A = dlattice(dim, n; Ti)
+    u0 = rand(size(A, 1))
+    prb=LinearProblem(A,A*u0)
+    u=solve(prb,AMGSolverAlgorithm())
+    @show norm(u0 - u)
+    norm(u0 - u) < 10 * sqrt(eps(Float64))
+end
+
+function test_linsolve_rlx(Ti, dim, n, bsize = 1)
+    A = dlattice(dim, n; Ti)
+    u0 = rand(size(A, 1))
+    prb=LinearProblem(A,A*u0)
+    u=solve(prb,RLXSolverAlgorithm(;
+                                   param = (solver = (tol = 1.0e-12, type = "bicgstab"), precond = (type = "ilu0",)),))
+    
+    @show norm(u0 - u)
+    norm(u0 - u) < 10 * sqrt(eps(Float64))
+end
+
+function test_linsolve_amgprecon(Ti, dim, n, bsize = 1)
+    A = dlattice(dim, n; Ti)
+    u0 = rand(size(A, 1))
+    prb=LinearProblem(A,A*u0)
+
+    amg = AMGPrecon(A; blocksize = bsize)
+    u = solve(prb,KrylovJL_CG(), Pl=amg)
+    @show norm(u0 - u)
+    norm(u0 - u) < 10 * sqrt(eps(Float64))
+    true
+end
+
+function test_linsolve_rlxprecon(Ti, dim, n, bsize = 1)
+    A = dlattice(dim, n; Ti)
+    u0 = rand(size(A, 1))
+    prb=LinearProblem(A,A*u0)
+
+    rlx = RLXPrecon(A; blocksize = bsize, precond=(type="ilu0",))
+    u = solve(prb,KrylovJL_CG(), Pl=rlx)
+    @show norm(u0 - u)
+    norm(u0 - u) < 10 * sqrt(eps(Float64))
+    true
+end
+
+
+@static if VERSION >=v"1.9.0"
+    
+for Ti in [Int32, Int64]
+    @testset "LinearSolve, $Ti" begin
+        @test test_linsolve_amg(Ti, 2, NTest)
+        @test test_linsolve_rlx(Ti, 2, NTest)
+        @test test_linsolve_amgprecon(Ti, 2, NTest)
+        @test test_linsolve_rlxprecon(Ti, 2, NTest)
+    end
+
+end
+
 end
