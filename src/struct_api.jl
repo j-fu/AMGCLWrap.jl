@@ -1,5 +1,6 @@
-#################################################################################################
-# AMG Solver
+################################################################################################
+# Docstring snippets
+
 const matrixparam="""
                   - `sparsematrix`: `SparseArrays.AbstractSparseMatrixCSC` or `SparseMatricesCSR.SparseMatrixCSR`. 
                   """
@@ -11,10 +12,18 @@ const stdparams = """
                   - `param:`   Ignored if `nothing` (default). Otherwise, any object (e.g. Tuple, Dict or JSON string) which can be turned into a JSON string by `JSON3.write`.
                   """
 const amgsolverparams= """
-                       - `coarsening`: A [coarsening strategy](parameters.html#Coarsening-strategies)
-                       - `relax`: A [relaxation method](parameters.html#Relaxation-parameters)
-                       - `solver`: An [iterative solver](parameters.html#Iterative-solver-parameters)
+                       - `coarsening`: One of the  [Coarsening strategies](@ref)
+                       - `relax`: One of the [Relaxation strategies](@ref)
+                       - `solver`: One of the [Iterative solver strategies](@ref)
                        """    
+const rlxsolverparams= """
+                       - `precond`: One of the [Relaxation strategies](@ref) seen as preconditioner
+                       - `solver`: One of the [Iterative solver strategies](@ref)
+                       """    
+
+#################################################################################################
+# AMG Solver
+
 """
     AMGSolver(sparsematrix::AbstractSparseMatrix;
               blocksize::Int=1,
@@ -89,10 +98,6 @@ function AMGSolverAlgorithm end
 
 #################################################################################################
 # Relaxation  Solver
- const rlxsolverparams="""
-                       - `precond`: A [preconditioning method](parameters.html#Relaxation-parameters)
-                       - `solver`: An [iterative solver](parameters.html#Iterative-solver-parameters)
-                       """    
 """
     RLXSolver(sparsematrix::AbstractSparseMatrix;
               blocksize::Int=1,
