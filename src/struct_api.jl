@@ -207,7 +207,7 @@ end
               blocksize::Int=1,
               param=nothing,
               verbose::Bool=false,
-              precond::Union{AbstractRelaxation, NamedTuple}=SPAI0Relaxation())
+              precond::Union{AbstractRelaxation, NamedTuple}=ILU0Relaxation())
 $(docs["AMGCLWrap.RLXPrecon"])
 
 Parameters:
@@ -223,7 +223,7 @@ function RLXPrecon(sparsematrix::AbstractSparseMatrix;
                    param = nothing,
                    verbose::Bool = false,
                    blocksize::Int = 1,
-                   precond::Union{AbstractRelaxation, NamedTuple} = SPAI0Relaxation())
+                   precond::Union{AbstractRelaxation, NamedTuple} = ILU0Relaxation())
     if param == nothing
         param = precond
     end

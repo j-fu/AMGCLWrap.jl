@@ -1,7 +1,7 @@
 name = "AMGCLWrap"
 uuid = "4f76b812-4ba5-496d-b042-d70715554288"
 authors = ["Jürgen Fuhrmann <juergen-fuhrmann@web.de> and contributors"]
-version = "0.3.0"
+version = "0.3.1"
 
 [deps]
 AMGCL_C_jll = "e3ba5bb7-5aef-5326-9a13-9617383dcacb"
