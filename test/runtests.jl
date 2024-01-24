@@ -90,7 +90,7 @@ end
 const NTest = 10000
 
 @testset "catch error" begin
-    @test test_err(Int64, 1, NTest)
+    @test_throws ErrorException test_err(Int64, 1, NTest)
 end
 
 @testset "blocksizes" begin

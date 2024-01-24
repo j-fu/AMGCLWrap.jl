@@ -11,6 +11,7 @@ tojson(param) = JSON3.write(param)
 tojson(::Nothing) = ""
 tojson(s::String) = s
 
+
 """
     blocksize_instantiated(blocksize)::Bool
 
@@ -75,7 +76,7 @@ abstract type AbstractAMGCLOperator end
     error_state(operator)::Int
 Return error state of operator. Ok if 0.
 """
-error_state(o::AbstractAMGCLOperator) = o.error_state
+error_state(o::Union{AbstractAMGCLOperator,AMGCLInfo}) = o.error_state
 
 #
 # Define operator types
@@ -133,6 +134,12 @@ for operatordict in operatordicts
                          AMGCLInfo,
                          ($Operator{$JTv, $JTi}, Ptr{$CTv}, Ptr{$CTv}),
                          operator, sol, rhs)
+            e=error_state(info)
+            if e!=0
+                error("""unable to apply operator
+                         error_state: $e
+                         Error occured in AMGCL (C++)""")
+            end    
             return (iters = info.iters, residual = info.residual, error_state = info.error_state)
         end
     end
@@ -179,7 +186,15 @@ for Operator in operators
             myoffset = 1 - getoffset(Bi)
             csr.rowptr .-= myoffset
             csr.colval .-= myoffset
-            operator = $Operator(csr.m, csr.rowptr, csr.colval, csr.nzval, blocksize, tojson(param))
+            s= tojson(param)
+            operator = $Operator(csr.m, csr.rowptr, csr.colval, csr.nzval, blocksize,s)
+            e=error_state(operator)
+            if e!=0
+                error("""Unable to create operator
+                       error_state: $e
+                       param: "$s" 
+                       May be param is incorrect JSON?""")
+            end    
             csr.rowptr .+= myoffset
             csr.colval .+= myoffset
             return operator
