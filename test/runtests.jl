@@ -240,8 +240,6 @@ end
 
 
 
-@static if VERSION >=v"1.9.0"
-    
 for Ti in [Int32, Int64]
     @testset "LinearSolve, $Ti" begin
         @test test_linsolve_amg(Ti, 2, NTest)
@@ -249,7 +247,5 @@ for Ti in [Int32, Int64]
         @test test_linsolve_amgprecon(Ti, 2, NTest)
         @test test_linsolve_rlxprecon(Ti, 2, NTest)
     end
-
-end
 
 end

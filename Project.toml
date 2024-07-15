@@ -21,13 +21,10 @@ LinearAlgebra = "1.6"
 LinearSolve = "2.22"
 SparseArrays = "1.6"
 SparseMatricesCSR = "0.6.7"
-julia = "1.6"
+julia = "1.9"
 
 [extensions]
 AMGCLWrapLinearSolveExt = "LinearSolve"
-
-[extras]
-LinearSolve = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"
 
 [weakdeps]
 LinearSolve = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"
