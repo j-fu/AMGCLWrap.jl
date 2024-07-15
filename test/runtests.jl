@@ -3,6 +3,7 @@ using Test, LinearAlgebra, SparseArrays
 using Krylov
 using LinearSolve
 using ILUZero
+using Random
 
 A ⊕ B = kron(I(size(B, 1)), A) + kron(B, I(size(A, 1)))
 function lattice(n; Tv = Float64)

@@ -1,8 +1,5 @@
-/Manifest.toml
-/docs/Manifest.toml
-/test/Manifest.toml
+Manifest*.toml
 /docs/build/
-.repl_history
 *~
 /quarry
 /QUARRY
