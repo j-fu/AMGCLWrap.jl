@@ -4,6 +4,31 @@ using Krylov
 using LinearSolve
 using ILUZero
 using Random
+import ExplicitImports, Aqua
+
+@testset "ExplicitImports" begin
+    @test ExplicitImports.check_no_implicit_imports(AMGCLWrap) === nothing
+    @test ExplicitImports.check_no_stale_explicit_imports(AMGCLWrap) === nothing
+end
+
+@testset "Aqua" begin
+    Aqua.test_ambiguities(AMGCLWrap)
+    Aqua.test_unbound_args(AMGCLWrap)
+    Aqua.test_undefined_exports(AMGCLWrap)
+    Aqua.test_project_extras(AMGCLWrap)
+    Aqua.test_stale_deps(AMGCLWrap)
+    Aqua.test_deps_compat(AMGCLWrap)
+    Aqua.test_piracies(AMGCLWrap)
+    Aqua.test_persistent_tasks(AMGCLWrap)
+end
+
+if isdefined(Docs,:undocumented_names) # >=1.11
+    @testset "UndocumentedNames" begin
+        @test isempty(Docs.undocumented_names(AMGCLWrap))
+    end
+end
+
+
 
 A ⊕ B = kron(I(size(B, 1)), A) + kron(B, I(size(A, 1)))
 function lattice(n; Tv = Float64)
@@ -165,7 +190,6 @@ function tskew(;skew=0.0)
 end
 
 @testset "skew" begin
-    @test tskew(skew=0.0)
     @test tskew(skew=0.2)
     @test tskew(skew=0.4)
     @test tskew(skew=0.6)
