@@ -2,6 +2,7 @@ using AMGCLWrap
 using Test, LinearAlgebra, SparseArrays
 using Krylov
 using LinearSolve
+using ILUZero
 
 A ⊕ B = kron(I(size(B, 1)), A) + kron(B, I(size(A, 1)))
 function lattice(n; Tv = Float64)
@@ -13,9 +14,10 @@ end
 
 lattice(L...; Tv = Float64) = lattice(L[1]; Tv) ⊕ lattice(L[2:end]...; Tv)
 
-function dlattice(dim, N; Tv = Float64, Ti = Int64, dd = 1.0e-2)
+function dlattice(dim, N; Tv = Float64, Ti = Int64, dd = 1.0e-2, skew=0.0)
     n = N^(1 / dim) |> ceil |> Int
-    SparseMatrixCSC{Tv, Ti}(lattice([n for i = 1:dim]...; Tv) + Tv(dd) * I)
+    D=Diagonal(rand(1-skew:0.001:1.0+skew,n^dim))
+    s=SparseMatrixCSC{Tv, Ti}(lattice([n for i = 1:dim]...; Tv)*D + Tv(dd) * I)
 end;
 
 function iterate(A, f, M)
@@ -55,6 +57,8 @@ function test_amgprecon(Ti, dim, n, bsize = 1)
     norm(u0 - u) < 10 * sqrt(eps(Float64))
     true
 end
+
+
 
 function test_rlxprecon(Ti, dim, n, bsize = 1)
     A = dlattice(dim, n; Ti)
@@ -141,10 +145,30 @@ for Ti in [Int32, Int64]
     end
 end
 
+function tskew(;skew=0.0)
+    Random.seed!(4321)
+    dd=0.01
+    A = dlattice(3, 100000;skew, dd)
+    n=size(A, 1)
+    u0 = rand(n)
+    f = A * u0
+    @show sum(A) ≈ n*dd
+    rlx = RLXPrecon(A; param = (type = "ilu0",))
+    u1, stats1 = Krylov.bicgstab(A, f; M=rlx, ldiv = true, rtol = 1.0e-12)
+    iluz=ilu0(A)
+    u2, stats2 = Krylov.bicgstab(A, f; M=iluz, ldiv = true, rtol = 1.0e-12)
+    @show norm(u1 - u2)
+    @show abs(stats1.niter-stats2.niter)
+    norm(u1 - u2) < 10000 * sqrt(eps(Float64))  && abs(stats1.niter-stats2.niter)<5
+    
+end
 
-
-
-
+@testset "skew" begin
+    @test tskew(skew=0.0)
+    @test tskew(skew=0.2)
+    @test tskew(skew=0.4)
+    @test tskew(skew=0.6)
+end
 
 
 function test_linsolve_amg(Ti, dim, n, bsize = 1)
@@ -175,8 +199,7 @@ function test_linsolve_amgprecon(Ti, dim, n, bsize = 1)
     amg = AMGPrecon(A; blocksize = bsize)
     u = solve(prb,KrylovJL_CG(), Pl=amg)
     @show norm(u0 - u)
-    norm(u0 - u) < 10 * sqrt(eps(Float64))
-    true
+    norm(u0 - u) < 1000 * sqrt(eps(Float64))
 end
 
 function test_linsolve_rlxprecon(Ti, dim, n, bsize = 1)
@@ -187,9 +210,9 @@ function test_linsolve_rlxprecon(Ti, dim, n, bsize = 1)
     rlx = RLXPrecon(A; blocksize = bsize, precond=(type="ilu0",))
     u = solve(prb,KrylovJL_CG(), Pl=rlx)
     @show norm(u0 - u)
-    norm(u0 - u) < 10 * sqrt(eps(Float64))
-    true
+    norm(u0 - u) < 1000 * sqrt(eps(Float64))
 end
+
 
 
 @static if VERSION >=v"1.9.0"
