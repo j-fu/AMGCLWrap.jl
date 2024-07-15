@@ -160,6 +160,14 @@ end
 
 LinearAlgebra.:\(operator::AbstractAMGCLOperator, v) = ldiv!(copy(v), operator, v)
 
+function sparsecsr(csc::SparseArrays.AbstractSparseMatrixCSC{Tv, Ti}) where {Tv ,Ti}
+    if issymmetric(csc) 
+        SparseMatrixCSR{1}(transpose(SparseMatrixCSC(csc)))
+    else
+        SparseMatrixCSR{1}(transpose(sparse(transpose(SparseMatrixCSC(csc)))))
+    end
+end
+
 #
 # Constructors from sparse matrices
 #
@@ -201,7 +209,7 @@ for Operator in operators
         end
 
         function $Operator(csc::SparseArrays.AbstractSparseMatrixCSC{Tv, Ti}, param; blocksize = 1) where {Tv, Ti}
-            $Operator(SparseMatrixCSR{1}(transpose(SparseMatrixCSC(csc))), param; blocksize)
+            $Operator(sparsecsr(csc), param; blocksize)
         end
     end
 end

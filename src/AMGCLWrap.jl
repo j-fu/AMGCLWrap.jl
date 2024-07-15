@@ -1,11 +1,17 @@
+"""
+    AMGCLWrap
+
+$(read(joinpath(@__DIR__,"..","README.md"),String))
+"""
 module AMGCLWrap
-using AMGCL_C_jll
-using SparseMatricesCSR
-using SparseArrays
-using LinearAlgebra
-import JSON3
+
+using AMGCL_C_jll: AMGCL_C_jll, libamgcl_c
+using DocStringExtensions: DocStringExtensions, TYPEDEF, TYPEDFIELDS
+using LinearAlgebra: LinearAlgebra, issymmetric, ldiv!, transpose
+using SparseArrays: SparseArrays, AbstractSparseMatrix, SparseMatrixCSC, sparse
+using SparseMatricesCSR: SparseMatricesCSR, SparseMatrixCSR, getoffset
 using CompositeStructs: @composite
-using DocStringExtensions
+import JSON3
 
 include("amgclc_wrapper.jl")
 include("parameters.jl")
