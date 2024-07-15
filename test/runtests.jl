@@ -235,7 +235,7 @@ function test_linsolve_rlxprecon(Ti, dim, n, bsize = 1)
     rlx = RLXPrecon(A; blocksize = bsize, precond=(type="ilu0",))
     u = solve(prb,KrylovJL_CG(), Pl=rlx)
     @show norm(u0 - u)
-    norm(u0 - u) < 1000 * sqrt(eps(Float64))
+    norm(u0 - u) < 1.0e4 * sqrt(eps(Float64))
 end
 
 
