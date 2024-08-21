@@ -18,6 +18,7 @@ include("parameters.jl")
 include("struct_api.jl")
 
 export AMGSolver, RLXSolver, AMGPrecon, RLXPrecon, blocksize_instantiated, error_state
+export AMGPreconditioner, RLXPreconditioner
 export AMGSolverAlgorithm, RLXSolverAlgorithm
 
 

@@ -6,7 +6,6 @@ const matrixparam="""
                   """
 
 const stdparams = """
-                  - `sparsematrix`: `SparseArrays.AbstractSparseMatrixCSC` or `SparseMatricesCSR.SparseMatrixCSR`. 
                   - `blocksize`: If blocksize >1, group unknowns into blocks of given size and cast the matrix internally to a sparse matrix of `blocksize x blocksize` static matrices. Block sizes 1...8 are instantiated.
                   - `verbose`: if true, print generated JSON string passed to amgcl.
                   - `param:`   Ignored if `nothing` (default). Otherwise, any object (e.g. Tuple, Dict or JSON string) which can be turned into a JSON string by `JSON3.write`.
@@ -55,7 +54,6 @@ function AMGSolver(sparsematrix::AbstractSparseMatrix;
     AMGSolver(sparsematrix, param; blocksize)
 end
 
-@static if VERSION >=v"1.9.0"
 
 Base.@kwdef mutable struct AMGSolverAlgorithmData
     param = nothing
@@ -75,8 +73,6 @@ function (data::AMGSolverAlgorithmData)(A, b, u, p, newA, Pl, Pr, solverdata; ve
     ldiv!(u,data.instance,b)
 end
 
-    
-end # @static if
 
 """
     AMGSolverAlgorithm(;blocksize::Int=1,
@@ -90,9 +86,6 @@ Algebraic multigrid preconditioned Krylov subspace solver algorithm for LinearSo
 Parameters:
 $(stdparams)
 $(amgsolverparams)
-
-!!! compat
-    Only available for Julia version >=1.9
 """
 function AMGSolverAlgorithm end
 
@@ -128,8 +121,6 @@ function RLXSolver(sparsematrix::AbstractSparseMatrix;
 end
 
 
-@static if VERSION >=v"1.9.0"
-
 Base.@kwdef mutable struct RLXSolverAlgorithmData
     param = nothing
     verbose::Bool = false
@@ -147,9 +138,6 @@ function (data::RLXSolverAlgorithmData)(A, b, u, p, newA, Pl, Pr, solverdata; ve
     ldiv!(u,data.instance,b)
 end
 
-end # @static if
-
-
 
 """
     RLXSolverAlgorithm(;blocksize::Int=1,
@@ -162,9 +150,6 @@ Algebraic multigrid preconditioned Krylov subspace solver algorithm for LinearSo
 Parameters:
 $(stdparams)
 $(rlxsolverparams)
-
-!!! compat
-    Only available for Julia version >=1.9
 """
 function RLXSolverAlgorithm end
 
@@ -203,6 +188,32 @@ function AMGPrecon(sparsematrix::AbstractSparseMatrix;
 end
 
 """
+   $(TYPEDEF)
+
+Preconditioner strategy (e.g. for the new `precs` kwarg in LinearSolve) for interfacing
+[`AMGPrecon`](@ref).
+
+Fields (for documentation, see [`AMGPrecon`](@ref)):
+$(TYPEDFIELDS)
+"""
+Base.@kwdef struct AMGPreconditioner
+    param = nothing
+    verbose::Bool = false
+    blocksize::Int = 1
+    coarsening::Union{AbstractCoarsening, NamedTuple} = SmoothedAggregationCoarsening()
+    relax::Union{AbstractRelaxation, NamedTuple} = SPAI0Relaxation()
+end
+
+function (amg::AMGPreconditioner)(A::AbstractSparseMatrix)
+    (;param, verbose, blocksize, coarsening, relax)=amg
+    AMGPrecon(A; param, verbose, blocksize, coarsening, relax)
+end
+
+(amg::AMGPreconditioner)(A,p)=(amg(A),p)
+
+#################################################################################################
+# Relaxation Preconditioner
+"""
     RLXPrecon(sparsematrix::AbstractSparseMatrix;
               blocksize::Int=1,
               param=nothing,
@@ -213,12 +224,8 @@ $(docs["AMGCLWrap.RLXPrecon"])
 Parameters:
 $(matrixparam)
 $(stdparams)
-- `precond`: A [preconditioned method](#Relaxation/Preconditioner-parameters)
+- `precond`: A [preconditioning method](#Relaxation/Preconditioner-parameters)
 """
-
-#################################################################################################
-# Relaxation Preconditioner
-
 function RLXPrecon(sparsematrix::AbstractSparseMatrix;
                    param = nothing,
                    verbose::Bool = false,
@@ -233,3 +240,26 @@ function RLXPrecon(sparsematrix::AbstractSparseMatrix;
     RLXPrecon(sparsematrix, param; blocksize)
 end
 
+"""
+   $(TYPEDEF)
+
+Preconditioner strategy (e.g. for the new `precs` kwarg in LinearSolve) for interfacing
+[`RLXPrecon`](@ref).
+
+Fields (for documentation, see [`RLXPrecon`](@ref)):
+
+$(TYPEDFIELDS)
+"""
+Base.@kwdef struct RLXPreconditioner
+    param = nothing
+    verbose::Bool = false
+    blocksize::Int = 1
+    precond::Union{AbstractRelaxation, NamedTuple} = ILU0Relaxation()
+end
+
+function (rlx::RLXPreconditioner)(A::AbstractSparseMatrix)
+    (;param, verbose, blocksize, precond)=rlx
+    RLXPrecon(A; param, verbose, blocksize, precond)
+end
+
+(rlx::RLXPreconditioner)(A,p)=(rlx(A),p)
