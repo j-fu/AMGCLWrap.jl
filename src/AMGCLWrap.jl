@@ -7,7 +7,7 @@ module AMGCLWrap
 
 using AMGCL_C_jll: AMGCL_C_jll, libamgcl_c
 using DocStringExtensions: DocStringExtensions, TYPEDEF, TYPEDFIELDS
-using LinearAlgebra: LinearAlgebra, issymmetric, ldiv!, transpose
+using LinearAlgebra: LinearAlgebra, issymmetric, ldiv!, transpose, I
 using SparseArrays: SparseArrays, AbstractSparseMatrix, SparseMatrixCSC, sparse
 using SparseMatricesCSR: SparseMatricesCSR, SparseMatrixCSR, getoffset
 using CompositeStructs: @composite

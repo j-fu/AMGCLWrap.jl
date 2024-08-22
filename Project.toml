@@ -28,4 +28,3 @@ julia = "1.9"
 
 [extensions]
 AMGCLWrapLinearSolveExt = "LinearSolve"
-

@@ -209,7 +209,7 @@ function (amg::AMGPreconditioner)(A::AbstractSparseMatrix)
     AMGPrecon(A; param, verbose, blocksize, coarsening, relax)
 end
 
-(amg::AMGPreconditioner)(A,p)=(amg(A),p)
+(amg::AMGPreconditioner)(A,p)=(amg(A),I)
 
 #################################################################################################
 # Relaxation Preconditioner
@@ -262,4 +262,4 @@ function (rlx::RLXPreconditioner)(A::AbstractSparseMatrix)
     RLXPrecon(A; param, verbose, blocksize, precond)
 end
 
-(rlx::RLXPreconditioner)(A,p)=(rlx(A),p)
+(rlx::RLXPreconditioner)(A,p)=(rlx(A),I)
