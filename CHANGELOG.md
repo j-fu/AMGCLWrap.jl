@@ -1,13 +1,13 @@
 # Changelog
 
 ## v1.0, 2024-08-XX
-- Transition to genuine semantig versioning
 - Support `precs` API of LinearSolve
-- Require julia 1.10
+- Not really breaking, but transition to genuine semantig versioning
+
 
 ## v0.4, 2024-07-15
-- fix SparseMatrixCSR from CSC for nonsymmetric matrices
-- add Aqua, ExplicitImports tests, ci on apple silicon
+- Fix SparseMatrixCSR from CSC for nonsymmetric matrices
+- Add Aqua, ExplicitImports tests, ci on apple silicon
 - Require julia 1.9
 
 ## v0.3, 2024-01-15
