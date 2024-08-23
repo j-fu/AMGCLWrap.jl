@@ -6,7 +6,7 @@ DocMeta.setdocmeta!(AMGCLWrap, :DocTestSetup, :(using AMGCLWrap); recursive = tr
 makedocs(;
          modules = [AMGCLWrap],
          authors = "Jürgen Fuhrmann <juergen-fuhrmann@web.de> and contributors",
-         repo = "https://github.com/j-fu/AMGCLWrap.jl/blob/{commit}{path}#{line}",
+         repo = "https://github.com/j-fu/AMGCLWrap.jl/",
          sitename = "AMGCLWrap.jl",
          clean = false,
          format = Documenter.HTML(;
@@ -19,6 +19,7 @@ makedocs(;
                   "preconditioners.md"
                   "parameters.md"
                   "misc.md"
+                  "Changelog" => "changelog.md"
                   ],)
 
 deploydocs(; repo = "github.com/j-fu/AMGCLWrap.jl", devbranch = "main")

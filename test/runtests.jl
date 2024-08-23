@@ -12,14 +12,7 @@ import ExplicitImports, Aqua
 end
 
 @testset "Aqua" begin
-    Aqua.test_ambiguities(AMGCLWrap)
-    Aqua.test_unbound_args(AMGCLWrap)
-    Aqua.test_undefined_exports(AMGCLWrap)
-    Aqua.test_project_extras(AMGCLWrap)
-    Aqua.test_stale_deps(AMGCLWrap)
-    Aqua.test_deps_compat(AMGCLWrap)
-    Aqua.test_piracies(AMGCLWrap)
-    Aqua.test_persistent_tasks(AMGCLWrap)
+    Aqua.test_all(AMGCLWrap)
 end
 
 if isdefined(Docs,:undocumented_names) # >=1.11
@@ -31,6 +24,7 @@ end
 
 
 A ⊕ B = kron(I(size(B, 1)), A) + kron(B, I(size(A, 1)))
+
 function lattice(n; Tv = Float64)
     d = fill(2 * one(Tv), n)
     d[1] = one(Tv)
@@ -227,6 +221,17 @@ function test_linsolve_amgprecon(Ti, dim, n, bsize = 1)
     norm(u0 - u) < 1000 * sqrt(eps(Float64))
 end
 
+
+function test_linsolve_amgprecs(Ti, dim, n, bsize = 1)
+    A = dlattice(dim, n; Ti)
+    u0 = rand(size(A, 1))
+    prb=LinearProblem(A,A*u0)
+    u = solve(prb,KrylovJL_CG(precs=AMGPreconditioner(blocksize = bsize)))
+    @show norm(u0 - u)
+    norm(u0 - u) < 1000 * sqrt(eps(Float64))
+end
+
+
 function test_linsolve_rlxprecon(Ti, dim, n, bsize = 1)
     A = dlattice(dim, n; Ti)
     u0 = rand(size(A, 1))
@@ -238,6 +243,17 @@ function test_linsolve_rlxprecon(Ti, dim, n, bsize = 1)
     norm(u0 - u) < 1.0e4 * sqrt(eps(Float64))
 end
 
+function test_linsolve_rlxprecs(Ti, dim, n, bsize = 1)
+    A = dlattice(dim, n; Ti)
+    u0 = rand(size(A, 1))
+    prb=LinearProblem(A,A*u0)
+
+    rlx =
+    u = solve(prb,KrylovJL_CG(precs= RLXPreconditioner(blocksize = bsize, precond=(type="ilu0",))))
+    @show norm(u0 - u)
+    norm(u0 - u) < 1.0e4 * sqrt(eps(Float64))
+end
+
 
 
 for Ti in [Int32, Int64]
@@ -245,7 +261,9 @@ for Ti in [Int32, Int64]
         @test test_linsolve_amg(Ti, 2, NTest)
         @test test_linsolve_rlx(Ti, 2, NTest)
         @test test_linsolve_amgprecon(Ti, 2, NTest)
+        @test test_linsolve_amgprecs(Ti, 2, NTest)
         @test test_linsolve_rlxprecon(Ti, 2, NTest)
+        @test test_linsolve_rlxprecs(Ti, 2, NTest)
     end
 
 end

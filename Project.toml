@@ -1,7 +1,7 @@
 name = "AMGCLWrap"
 uuid = "4f76b812-4ba5-496d-b042-d70715554288"
 authors = ["Jürgen Fuhrmann <juergen-fuhrmann@web.de> and contributors"]
-version = "0.4.0"
+version = "1.0.0"
 
 [deps]
 AMGCL_C_jll = "e3ba5bb7-5aef-5326-9a13-9617383dcacb"
@@ -12,19 +12,19 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 SparseMatricesCSR = "a0a7dd2c-ebf4-11e9-1f05-cf50bc540ca1"
 
+[weakdeps]
+LinearSolve = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"
+
 [compat]
 AMGCL_C_jll = "0.3.0"
 CompositeStructs = "0.1.5"
 DocStringExtensions = "0.9"
 JSON3 = "1.14.0"
-LinearAlgebra = "1.6"
-LinearSolve = "2.22"
-SparseArrays = "1.6"
+LinearAlgebra = "1.9"
+LinearSolve = "2.33"
+SparseArrays = "1.9"
 SparseMatricesCSR = "0.6.7"
 julia = "1.9"
 
 [extensions]
 AMGCLWrapLinearSolveExt = "LinearSolve"
-
-[weakdeps]
-LinearSolve = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"
