@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.0, 2024-08-XX
+## v1.0, 2024-08-23
 - Support `precs` API of LinearSolve
 - Not really breaking, but transition to genuine semantig versioning
 
