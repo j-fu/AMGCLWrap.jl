@@ -12,14 +12,7 @@ import ExplicitImports, Aqua
 end
 
 @testset "Aqua" begin
-    Aqua.test_ambiguities(AMGCLWrap)
-    Aqua.test_unbound_args(AMGCLWrap)
-    Aqua.test_undefined_exports(AMGCLWrap)
-    Aqua.test_project_extras(AMGCLWrap)
-    Aqua.test_stale_deps(AMGCLWrap)
-    Aqua.test_deps_compat(AMGCLWrap)
-    Aqua.test_piracies(AMGCLWrap)
-    Aqua.test_persistent_tasks(AMGCLWrap)
+    Aqua.test_all(AMGCLWrap)
 end
 
 if isdefined(Docs,:undocumented_names) # >=1.11
