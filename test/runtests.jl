@@ -180,7 +180,7 @@ function tskew(;skew=0.0)
     @show norm(u1 - u2)
     @show abs(stats1.niter-stats2.niter)
     norm(u1 - u2) < 10000 * sqrt(eps(Float64))  && abs(stats1.niter-stats2.niter)<5
-    
+
 end
 
 @testset "skew" begin
@@ -205,7 +205,7 @@ function test_linsolve_rlx(Ti, dim, n, bsize = 1)
     prb=LinearProblem(A,A*u0)
     u=solve(prb,RLXSolverAlgorithm(;
                                    param = (solver = (tol = 1.0e-12, type = "bicgstab"), precond = (type = "ilu0",)),))
-    
+
     @show norm(u0 - u)
     norm(u0 - u) < 10 * sqrt(eps(Float64))
 end
@@ -226,7 +226,7 @@ function test_linsolve_amgprecs(Ti, dim, n, bsize = 1)
     A = dlattice(dim, n; Ti)
     u0 = rand(size(A, 1))
     prb=LinearProblem(A,A*u0)
-    u = solve(prb,KrylovJL_CG(precs=AMGPreconditioner(blocksize = bsize)))
+    u = solve(prb,KrylovJL_CG(precs=AMGPreconBuilder(blocksize = bsize)))
     @show norm(u0 - u)
     norm(u0 - u) < 1000 * sqrt(eps(Float64))
 end
@@ -249,7 +249,7 @@ function test_linsolve_rlxprecs(Ti, dim, n, bsize = 1)
     prb=LinearProblem(A,A*u0)
 
     rlx =
-    u = solve(prb,KrylovJL_CG(precs= RLXPreconditioner(blocksize = bsize, precond=(type="ilu0",))))
+    u = solve(prb,KrylovJL_CG(precs= RLXPreconBuilder(blocksize = bsize, precond=(type="ilu0",))))
     @show norm(u0 - u)
     norm(u0 - u) < 1.0e4 * sqrt(eps(Float64))
 end

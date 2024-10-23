@@ -2,8 +2,7 @@
 
 ```@docs
 AMGPrecon
-AMGPreconditioner
+AMGPreconBuilder
 RLXPrecon
-RLXPreconditioner
+RLXPreconBuilder
 ```
-
