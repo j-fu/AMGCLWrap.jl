@@ -2,7 +2,7 @@
 # Docstring snippets
 
 const matrixparam="""
-                  - `sparsematrix`: `SparseArrays.AbstractSparseMatrixCSC` or `SparseMatricesCSR.SparseMatrixCSR`. 
+                  - `sparsematrix`: `SparseArrays.AbstractSparseMatrixCSC` or `SparseMatricesCSR.SparseMatrixCSR`.
                   """
 
 const stdparams = """
@@ -14,11 +14,11 @@ const amgsolverparams= """
                        - `coarsening`: One of the  [Coarsening strategies](@ref)
                        - `relax`: One of the [Relaxation strategies](@ref)
                        - `solver`: One of the [Iterative solver strategies](@ref)
-                       """    
+                       """
 const rlxsolverparams= """
                        - `precond`: One of the [Relaxation strategies](@ref) seen as preconditioner
                        - `solver`: One of the [Iterative solver strategies](@ref)
-                       """    
+                       """
 
 #################################################################################################
 # AMG Solver
@@ -153,7 +153,7 @@ $(rlxsolverparams)
 """
 function RLXSolverAlgorithm end
 
-    
+
 #################################################################################################
 # AMG Preconditioner
 
@@ -196,7 +196,7 @@ Preconditioner strategy (e.g. for the new `precs` kwarg in LinearSolve) for inte
 Fields (for documentation, see [`AMGPrecon`](@ref)):
 $(TYPEDFIELDS)
 """
-Base.@kwdef struct AMGPreconditioner
+Base.@kwdef struct AMGPreconBuilder
     param = nothing
     verbose::Bool = false
     blocksize::Int = 1
@@ -204,12 +204,12 @@ Base.@kwdef struct AMGPreconditioner
     relax::Union{AbstractRelaxation, NamedTuple} = SPAI0Relaxation()
 end
 
-function (amg::AMGPreconditioner)(A::AbstractSparseMatrix)
+function (amg::AMGPreconBuilder)(A::AbstractSparseMatrix)
     (;param, verbose, blocksize, coarsening, relax)=amg
     AMGPrecon(A; param, verbose, blocksize, coarsening, relax)
 end
 
-(amg::AMGPreconditioner)(A,p)=(amg(A),I)
+(amg::AMGPreconBuilder)(A,p)=(amg(A),I)
 
 #################################################################################################
 # Relaxation Preconditioner
@@ -250,16 +250,16 @@ Fields (for documentation, see [`RLXPrecon`](@ref)):
 
 $(TYPEDFIELDS)
 """
-Base.@kwdef struct RLXPreconditioner
+Base.@kwdef struct RLXPreconBuilder
     param = nothing
     verbose::Bool = false
     blocksize::Int = 1
     precond::Union{AbstractRelaxation, NamedTuple} = ILU0Relaxation()
 end
 
-function (rlx::RLXPreconditioner)(A::AbstractSparseMatrix)
+function (rlx::RLXPreconBuilder)(A::AbstractSparseMatrix)
     (;param, verbose, blocksize, precond)=rlx
     RLXPrecon(A; param, verbose, blocksize, precond)
 end
 
-(rlx::RLXPreconditioner)(A,p)=(rlx(A),I)
+(rlx::RLXPreconBuilder)(A,p)=(rlx(A),I)
