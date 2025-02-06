@@ -1,4 +1,6 @@
 # Changelog
+## v2.1, 2025-02-06
+- Allow for LinearSolve v3
 
 ## v2.0, 2024-10-23
 - Rename Preconditioner to PreconBuilder, closer to the logic of the LinearSolve precs API
