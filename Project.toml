@@ -1,7 +1,7 @@
 name = "AMGCLWrap"
 uuid = "4f76b812-4ba5-496d-b042-d70715554288"
 authors = ["Jürgen Fuhrmann <juergen-fuhrmann@web.de> and contributors"]
-version = "2.0.0"
+version = "2.1.0"
 
 [deps]
 AMGCL_C_jll = "e3ba5bb7-5aef-5326-9a13-9617383dcacb"
@@ -21,7 +21,7 @@ CompositeStructs = "0.1.5"
 DocStringExtensions = "0.9"
 JSON3 = "1.14.0"
 LinearAlgebra = "1.9"
-LinearSolve = "2.33"
+LinearSolve = "2.33, 3"
 SparseArrays = "1.9"
 SparseMatricesCSR = "0.6.7"
 julia = "1.9"
