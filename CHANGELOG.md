@@ -1,4 +1,7 @@
 # Changelog
+## v2.3, 2026-07-13
+- Allow for LinearSolve v5
+
 ## v2.2, 2026-06-06
 - Allow for LinearSolve v4
 
