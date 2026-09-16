@@ -8,7 +8,7 @@ const matrixparam="""
 const stdparams = """
                   - `blocksize`: If blocksize >1, group unknowns into blocks of given size and cast the matrix internally to a sparse matrix of `blocksize x blocksize` static matrices. Block sizes 1...8 are instantiated.
                   - `verbose`: if true, print generated JSON string passed to amgcl.
-                  - `param:`   Ignored if `nothing` (default). Otherwise, any object (e.g. Tuple, Dict or JSON string) which can be turned into a JSON string by `JSON3.write`.
+                  - `param:`   Ignored if `nothing` (default). Otherwise, any object (e.g. Tuple, Dict or JSON string) which can be turned into a JSON string by `JSON.json`.
                   """
 const amgsolverparams= """
                        - `coarsening`: One of the  [Coarsening strategies](@ref)
@@ -49,7 +49,7 @@ function AMGSolver(sparsematrix::AbstractSparseMatrix;
         param = (solver = solver, precond = (coarsening = coarsening, relax = relax))
     end
     if verbose
-        JSON3.pretty(param)
+       println(JSON.json(param,pretty=true))
     end
     AMGSolver(sparsematrix, param; blocksize)
 end
@@ -115,7 +115,7 @@ function RLXSolver(sparsematrix::AbstractSparseMatrix;
         param = (solver = solver, precond = precond)
     end
     if verbose
-        JSON3.pretty(param)
+       println(JSON.json(param,pretty=true))
     end
     RLXSolver(sparsematrix, param; blocksize)
 end
@@ -182,7 +182,7 @@ function AMGPrecon(sparsematrix::AbstractSparseMatrix;
         param = (coarsening = coarsening, relax = relax)
     end
     if verbose
-        JSON3.pretty(param)
+       println(JSON.json(param,pretty=true))
     end
     AMGPrecon(sparsematrix, param; blocksize)
 end
@@ -235,7 +235,7 @@ function RLXPrecon(sparsematrix::AbstractSparseMatrix;
         param = precond
     end
     if verbose
-        JSON3.pretty(param)
+       println(JSON.json(param,pretty=true))
     end
     RLXPrecon(sparsematrix, param; blocksize)
 end

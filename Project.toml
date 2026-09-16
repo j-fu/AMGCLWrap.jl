@@ -1,13 +1,13 @@
 name = "AMGCLWrap"
 uuid = "4f76b812-4ba5-496d-b042-d70715554288"
+version = "2.4.0"
 authors = ["Jürgen Fuhrmann <juergen-fuhrmann@web.de> and contributors"]
-version = "2.3.0"
 
 [deps]
 AMGCL_C_jll = "e3ba5bb7-5aef-5326-9a13-9617383dcacb"
 CompositeStructs = "534720e6-2374-40c5-8712-bf9a2f1643c6"
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
-JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
+JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 SparseMatricesCSR = "a0a7dd2c-ebf4-11e9-1f05-cf50bc540ca1"
@@ -15,16 +15,16 @@ SparseMatricesCSR = "a0a7dd2c-ebf4-11e9-1f05-cf50bc540ca1"
 [weakdeps]
 LinearSolve = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"
 
+[extensions]
+AMGCLWrapLinearSolveExt = "LinearSolve"
+
 [compat]
 AMGCL_C_jll = "0.3.0"
 CompositeStructs = "0.1.5"
 DocStringExtensions = "0.9"
-JSON3 = "1.14.0"
+JSON = "1.8.0"
 LinearAlgebra = "1.9"
 LinearSolve = "2.33,3,4,5"
 SparseArrays = "1.9"
 SparseMatricesCSR = "0.6.7"
 julia = "1.9"
-
-[extensions]
-AMGCLWrapLinearSolveExt = "LinearSolve"

@@ -8,7 +8,7 @@ Abstract parameter type.
 """
 abstract type AbstractAMGCLParams end
 
-Base.show(io::IO, p::AbstractAMGCLParams) = JSON3.pretty(io, p)
+Base.show(io::IO, p::AbstractAMGCLParams) = show(io,JSON.json(p,pretty=true))
 
 #####################################################################
 # Iterative solvers

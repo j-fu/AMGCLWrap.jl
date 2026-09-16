@@ -49,7 +49,7 @@ function test_amg(Ti, dim, n, bsize = 1)
     A = dlattice(dim, n; Ti)
     u0 = rand(size(A, 1))
     f = A * u0
-    amg = AMGSolver(A; blocksize = bsize)
+    amg = AMGSolver(A; blocksize = bsize, verbose=true)
     u = amg \ f
     @show norm(u0 - u)
     norm(u0 - u) < 10 * sqrt(eps(Float64))
@@ -61,7 +61,8 @@ function test_rlx(Ti, dim, n, bsize = 1)
     f = A * u0
     rlx = RLXSolver(A;
                     blocksize = bsize,
-                    param = (solver = (tol = 1.0e-12, type = "bicgstab"), precond = (type = "ilu0",)),)
+                    param = (solver = (tol = 1.0e-12, type = "bicgstab"), precond = (type = "ilu0",)),
+                    verbose=true)
     u = rlx \ f
     @show norm(u0 - u)
     norm(u0 - u) < 10 * sqrt(eps(Float64))
@@ -97,7 +98,8 @@ function test_err(Ti, dim, n, bsize = 1)
     f = A * u0
     rlx = RLXSolver(A;
                     blocksize = bsize,
-                    param = (solver = (tol = 1.0e-12, type = "bicgstab"), precond = (type = "ilu0x",)),)
+                    param = (solver = (tol = 1.0e-12, type = "bicgstab"), precond = (type = "ilu0x",)),
+                    verbose=true)
     if error_state(rlx) != 0
         println("error catched")
         return true

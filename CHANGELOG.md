@@ -1,4 +1,7 @@
 # Changelog
+## v2.4, 2026-09-16
+- Replace deprecated JSON3.jl by JSON.jl
+
 ## v2.3, 2026-07-13
 - Allow for LinearSolve v5
 
