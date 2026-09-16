@@ -7,7 +7,7 @@ struct AMGCLInfo
 end
 
 # Create json string from Tuple, Dict, String or Nothing
-tojson(param) = JSON3.write(param)
+tojson(param) = JSON.json(param)
 tojson(::Nothing) = ""
 tojson(s::String) = s
 
@@ -185,7 +185,7 @@ for Operator in operators
            Parameters:
             - `sparsematrix`: `SparseArrays.AbstractSparseMatrixCSC` or `SparseMatricesCSR.SparseMatrixCSR`. 
             - `blocksize`: If blocksize >1, group unknowns into blocks of given size and cast the matrix internally to a sparse matrix of        `blocksize x blocksize` static matrices. Block sizes 1...8 are instantiated.
-            - `param`: Any object (e.g. Tuple, Dict or JSON string) which can be turned into a JSON string by `JSON3.write`. If `params` is an emtpy string or `nothing` a default value is used.
+            - `param`: Any object (e.g. Tuple, Dict or JSON string) which can be turned into a JSON string by `JSON.json`. If `params` is an emtpy string or `nothing` a default value is used.
          """
         function $Operator(csr::SparseMatrixCSR{Bi, Tv, Ti}, param; blocksize = 1) where {Bi, Tv, Ti}
             if csr.m != csr.n

@@ -11,7 +11,7 @@ using LinearAlgebra: LinearAlgebra, issymmetric, ldiv!, transpose, I
 using SparseArrays: SparseArrays, AbstractSparseMatrix, SparseMatrixCSC, sparse
 using SparseMatricesCSR: SparseMatricesCSR, SparseMatrixCSR, getoffset
 using CompositeStructs: @composite
-import JSON3
+import JSON
 
 include("amgclc_wrapper.jl")
 include("parameters.jl")
